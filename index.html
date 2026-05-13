@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PlanAir</title>
+<!-- Build: 2026-05-11 07:24:47 -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f4f6fa">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PlanAir">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<style>
+:root {
+  --bg: #f4f6fa;
+  --s1: #ffffff;
+  --s2: #f0f2f7;
+  --border: #e2e6ef;
+  --accent: #c9a227;
+  --blue: #2d6ef5;
+  --green: #18a87a;
+  --red: #e03e38;
+  --text: #1a1f2e;
+  --muted: #8490a8;
+  --font: 'Outfit', sans-serif;
+  --body: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --bottom-nav-h: 68px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;
+  background-image:radial-gradient(ellipse 60% 40% at 20% 0%,rgba(45,110,245,.04),transparent),
+  radial-gradient(ellipse 40% 30% at 80% 100%,rgba(24,168,122,.03),transparent);
+  overscroll-behavior:none;}
+
+/* ── SETUP ── */
+#screen-setup{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.setup-box{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:36px;
+  width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,.1);}
+.setup-logo{font-size:26px;font-weight:800;letter-spacing:-.2px;margin-bottom:4px;}
+.setup-logo span{color:var(--accent);}
+.setup-tag{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:24px;}
+.step-lbl{font-size:12px;font-weight:700;color:var(--blue);margin:18px 0 8px;display:flex;align-items:center;gap:8px;}
+.step-n{width:20px;height:20px;background:var(--blue);color:#000;border-radius:50%;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sql-box{background:#f8faff;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);
+  font-size:11px;color:var(--blue);line-height:1.6;cursor:pointer;transition:border-color .2s;
+  white-space:pre-wrap;word-break:break-all;max-height:180px;overflow-y:auto;}
+.sql-box:hover{border-color:var(--blue);}
+
+/* ── LOGIN ── */
+#screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--s1);border:1px solid var(--border);border-radius:22px;padding:40px 34px;
+  width:100%;max-width:380px;box-shadow:0 8px 48px rgba(0,0,0,.10);animation:up .4s ease;}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.brand{text-align:center;margin-bottom:28px;}
+.brand-icon{font-size:34px;margin-bottom:8px;}
+.brand-name{font-size:25px;font-weight:800;letter-spacing:-.3px;font-family:var(--font);}
+.brand-name span{color:var(--accent);}
+.brand-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:1px;}
+.tabs{display:flex;background:var(--s2);border-radius:10px;padding:4px;margin-bottom:22px;}
+.tab{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);font-family:var(--font);
+  font-size:13px;font-weight:700;border-radius:7px;cursor:pointer;transition:all .2s;}
+.tab.active{background:var(--s1);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.pin-row{display:flex;gap:9px;justify-content:center;margin:9px 0;}
+.pin-box{width:50px;height:58px;background:var(--s2);border:2px solid var(--border);border-radius:11px;
+  color:var(--text);font-family:var(--mono);font-size:22px;font-weight:500;text-align:center;
+  caret-color:var(--accent);transition:border-color .18s,box-shadow .18s;}
+.pin-box:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,197,109,.12);}
+
+/* ── FORM ── */
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.form-input{width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:var(--font);font-size:14px;transition:border-color .18s,box-shadow .18s;
+  -webkit-appearance:none;}
+.form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,197,109,.1);}
+.form-input::placeholder{color:var(--muted);}
+select.form-input{cursor:pointer;}
+.form-group{margin-bottom:14px;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 18px;border:none;border-radius:10px;
+  font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.btn-primary{background:var(--accent);color:#07090f;}
+.btn-primary:active{background:#b8911f;transform:scale(.97);}
+.btn-secondary{background:var(--s2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:active{border-color:var(--accent);color:var(--accent);}
+.btn-ghost{background:transparent;color:var(--muted);font-size:12px;padding:8px 12px;}
+.btn-ghost:active{color:var(--text);}
+.btn-danger{background:transparent;color:var(--red);border:1px solid var(--red);font-size:12px;padding:7px 11px;}
+.btn-danger:active{background:var(--red);color:#fff;}
+.btn-success{background:var(--green);color:#07090f;}
+.btn-success:active{background:#6de8b8;}
+.btn-sm{padding:7px 12px;font-size:12px;}
+.btn-block{width:100%;justify-content:center;}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-family:var(--mono);font-size:10px;font-weight:500;}
+.bg{background:rgba(24,168,122,.1);color:var(--green);}
+.bb{background:rgba(45,110,245,.1);color:var(--blue);}
+.by{background:rgba(201,162,39,.12);color:#7a5f00;}
+.br{background:rgba(224,62,56,.1);color:var(--red);}
+.bx{background:var(--s2);color:var(--muted);}
+
+/* ── APP SHELL ── */
+#screen-app{min-height:100vh;display:flex;flex-direction:column;}
+
+/* Top header */
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;
+  background:var(--s1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;
+  padding-top:calc(12px + env(safe-area-inset-top, 0px));box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.app-logo{font-size:15px;font-weight:800;letter-spacing:-.2px;font-family:var(--font);}
+.app-logo span{color:var(--accent);}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.hdr-info{display:flex;flex-direction:column;}
+.hdr-nm{font-size:13px;font-weight:700;line-height:1.2;}
+.hdr-rl{font-family:var(--mono);font-size:10px;color:var(--muted);}
+
+/* Desktop top nav (hidden on mobile) */
+.desk-nav{display:flex;gap:3px;}
+.nav-btn{padding:7px 12px;border:none;background:transparent;color:var(--muted);font-family:var(--font);
+  font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;transition:all .2s;}
+.nav-btn.active,.nav-btn:hover{background:var(--s2);color:var(--text);}
+.nav-btn.active{color:var(--accent);}
+
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  background:var(--s1);border-top:1px solid var(--border);
+  display:none; /* shown only on mobile */
+  padding-bottom:var(--safe-bottom);
+  box-shadow:0 -4px 20px rgba(0,0,0,.06);
+}
+.bottom-nav-inner{display:flex;align-items:stretch;}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:10px 4px;border:none;background:transparent;cursor:pointer;
+  transition:all .2s;-webkit-tap-highlight-color:transparent;min-height:var(--bottom-nav-h);}
+.bnav-btn:active{background:var(--s2);}
+.bnav-icon{font-size:20px;transition:transform .2s;}
+.bnav-label{font-family:var(--font);font-size:10px;font-weight:700;color:var(--muted);transition:color .2s;}
+.bnav-btn.active .bnav-icon{transform:scale(1.15);}
+.bnav-btn.active .bnav-label{color:var(--accent);}
+.bnav-btn .bnav-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .2s;margin-top:-2px;}
+.bnav-btn.active .bnav-dot{opacity:1;}
+
+/* Body scroll area — padded for bottom nav on mobile */
+.app-body{flex:1;padding:20px 18px;max-width:1100px;width:100%;margin:0 auto;
+  padding-bottom:calc(var(--bottom-nav-h) + var(--safe-bottom) + 20px);}
+
+/* ── PAGE ── */
+.page{display:none;animation:up .3s ease;}
+.page.active{display:block;}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+.ph-title{font-size:20px;font-weight:800;letter-spacing:-.2px;font-family:var(--font);}
+.ph-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── WEEK NAV ── */
+.week-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.week-lbl{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:500;}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin-bottom:18px;}
+.prog-top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:6px;}
+.prog-bar{height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;transition:width .4s ease;}
+
+/* ── WEEK GRID ── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-bottom:20px;}
+.day-card{background:var(--s1);border:1px solid var(--border);border-radius:11px;
+  padding:11px 5px;text-align:center;cursor:pointer;transition:all .2s;user-select:none;-webkit-tap-highlight-color:transparent;}
+.day-card:active:not(.past){background:var(--s2);}
+.day-card.past{opacity:.3;cursor:default;pointer-events:none;}
+.day-card.today{border-color:var(--accent);}
+.day-card.dispo{border-color:var(--green);background:rgba(24,168,122,.06);}
+.day-card.indispo{border-color:var(--red);background:rgba(224,62,56,.05);}
+.day-card.editing{border-color:var(--blue);background:rgba(45,110,245,.07);box-shadow:0 0 0 2px rgba(45,110,245,.15);}
+.dc-name{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.dc-num{font-size:18px;font-weight:800;margin:4px 0 2px;}
+.dc-month{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.dc-icon{font-size:13px;margin-top:5px;}
+.dc-hrs{font-family:var(--mono);font-size:8px;color:var(--green);margin-top:2px;line-height:1.3;}
+
+/* ── DAY PANEL ── */
+.day-panel{background:var(--s1);border:1px solid var(--border);border-radius:16px;
+  padding:20px;animation:panelIn .3s ease;margin-bottom:16px;}
+@keyframes panelIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.dp-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.dp-datebadge{background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:8px 12px;text-align:center;min-width:60px;flex-shrink:0;}
+.dp-dname{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;}
+.dp-dnum{font-size:22px;font-weight:800;line-height:1;}
+.dp-dmonth{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.dp-title{font-size:16px;font-weight:800;font-family:var(--font);}
+.dp-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;}
+.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.choice-btn{padding:16px 10px;border-radius:12px;border:2px solid var(--border);background:var(--s2);
+  cursor:pointer;text-align:center;transition:all .2s;font-family:var(--font);-webkit-tap-highlight-color:transparent;}
+.choice-btn:active{transform:scale(.97);}
+.choice-btn.sel-yes{border-color:var(--green);background:rgba(24,168,122,.07);}
+.choice-btn.sel-no{border-color:var(--red);background:rgba(224,62,56,.06);}
+.ce{font-size:26px;margin-bottom:6px;}
+.cl{font-size:13px;font-weight:700;}
+.cs{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;}
+.time-panel{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;animation:up .25s ease;}
+.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.creneau-list{display:flex;flex-direction:column;gap:10px;}
+.creneau-item{display:flex;align-items:center;gap:14px;background:var(--s1);border:2px solid var(--border);
+  border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;user-select:none;-webkit-tap-highlight-color:transparent;}
+.creneau-item:active{transform:scale(.98);}
+.creneau-item.checked{border-color:var(--green);background:rgba(24,168,122,.07);}
+.cr-check{font-size:22px;transition:all .2s;flex-shrink:0;line-height:1;}
+.creneau-item.checked .cr-check{color:var(--green);}
+.cr-info{flex:1;}
+.cr-title{font-family:var(--font);font-size:14px;font-weight:700;}
+.cr-hours{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px;}
+.creneau-item.checked .cr-hours{color:var(--green);}
+.cr-edit-btn{background:transparent;border:1px solid var(--border);border-radius:7px;padding:5px 8px;
+  cursor:pointer;font-size:13px;transition:all .2s;flex-shrink:0;}
+.cr-edit-btn:active{background:var(--s2);}
+.dp-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.dp-ctr{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+/* ── RECAP ── */
+.recap-alert{padding:12px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;
+  background:rgba(24,168,122,.08);border:1px solid rgba(24,168,122,.2);color:var(--green);}
+.recap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;}
+.recap-item{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;}
+.ri-day{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;}
+.ri-status{font-size:13px;font-weight:700;margin-top:3px;}
+.ri-hrs{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:1px;}
+
+/* ── MY SHIFTS ── */
+.shift-row{background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:11px;}
+.sr-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+.sr-info{flex:1;min-width:0;}
+.sr-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-time{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── MANAGER CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px;}
+.v-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;transition:transform .2s;}
+.v-card:active{transform:scale(.98);}
+.v-av{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:10px;}
+.c0{background:rgba(232,197,109,.2);color:#e8c56d;}.c1{background:rgba(79,142,247,.2);color:#4f8ef7;}
+.c2{background:rgba(93,219,168,.2);color:#5ddba8;}.c3{background:rgba(240,96,90,.2);color:#f0605a;}
+.c4{background:rgba(180,130,255,.2);color:#b482ff;}.c5{background:rgba(255,160,80,.2);color:#ffa050;}
+.c6{background:rgba(80,200,220,.2);color:#50c8dc;}.c7{background:rgba(255,100,180,.2);color:#ff64b4;}
+.v-name{font-size:14px;font-weight:700;font-family:var(--font);}
+.v-meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:1px;}
+.v-pin{font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:5px;}
+.v-actions{margin-top:11px;display:flex;gap:6px;flex-wrap:wrap;}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto;border-radius:11px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;min-width:540px;}
+th{padding:10px 14px;text-align:left;font-family:var(--mono);font-size:10px;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);background:var(--s1);border-bottom:1px solid var(--border);}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.015);}
+.shift-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;
+  font-family:var(--mono);font-size:11px;background:rgba(79,142,247,.12);color:var(--blue);}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:18px;}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;}
+.stat-val{font-size:26px;font-weight:800;font-family:var(--mono);}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;
+  justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px 22px;
+  width:100%;max-width:500px;transform:translateY(100%);transition:transform .3s ease;
+  max-height:90vh;overflow-y:auto;padding-bottom:calc(22px + var(--safe-bottom));}
+.overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 18px;}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:18px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+
+/* ── ALERT ── */
+.alert{padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:13px;line-height:1.5;}
+.a-info{background:rgba(45,110,245,.07);border:1px solid rgba(45,110,245,.2);color:var(--blue);}
+.a-ok{background:rgba(24,168,122,.07);border:1px solid rgba(24,168,122,.2);color:var(--green);}
+.a-warn{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);color:#9a7a0a;}
+.a-err{background:rgba(224,62,56,.07);border:1px solid rgba(224,62,56,.2);color:var(--red);}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:44px 16px;color:var(--muted);border:1px dashed var(--border);border-radius:12px;}
+.empty-icon{font-size:34px;margin-bottom:10px;}
+.empty-txt{font-size:13px;line-height:1.6;}
+
+/* ── LOADING ── */
+#screen-loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;z-index:999;}
+.spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-family:var(--mono);font-size:12px;color:var(--muted);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(120px);background:var(--text);border:none;
+  color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:700;
+  opacity:0;transition:all .3s;z-index:400;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast.err{background:var(--red);color:#fff;}
+@media(max-width:700px){
+  .toast{bottom:calc(var(--bottom-nav-h) + var(--safe-bottom) + 12px);}
+}
+
+/* ── DESKTOP LAYOUT ── */
+@media(min-width:900px){
+  /* Wider body */
+  .app-body{max-width:1200px;padding:28px 32px;}
+
+  /* Header larger */
+  .app-header{padding:16px 32px;}
+  .app-logo{font-size:18px;}
+  .hdr-nm{font-size:14px;}
+
+  /* Desktop nav pills */
+  .nav-btn{padding:8px 16px;font-size:13px;}
+
+  /* Cards grid — more columns */
+  .cards-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+  .v-card{padding:22px;}
+  .v-av{width:46px;height:46px;font-size:15px;}
+  .v-name{font-size:15px;}
+
+  /* Week grid — bigger day cards */
+  .week-grid{gap:10px;}
+  .day-card{padding:16px 8px;border-radius:14px;}
+  .dc-num{font-size:24px;}
+  .dc-name{font-size:11px;}
+  .dc-month{font-size:11px;}
+  .dc-icon{font-size:18px;}
+  .dc-hrs{font-size:10px;display:block;}
+
+  /* Day panel wider */
+  .day-panel{padding:28px;border-radius:20px;}
+  .dp-dnum{font-size:28px;}
+  .dp-title{font-size:20px;}
+  .choice-row{gap:16px;}
+  .choice-btn{padding:22px 16px;}
+  .ce{font-size:32px;}
+  .cl{font-size:15px;}
+
+  /* Shift cards */
+  .shift-card{padding:18px 20px;}
+  .sc-time{font-size:15px;}
+
+  /* Stats row */
+  .stats-row{grid-template-columns:repeat(3,1fr);gap:16px;}
+  .stat-val{font-size:32px;}
+
+  /* Tables */
+  table{min-width:700px;}
+  th{padding:13px 18px;font-size:11px;}
+  td{padding:15px 18px;font-size:14px;}
+
+  /* Planning page — 2 col layout */
+  #page-planning .ph{margin-bottom:20px;}
+
+  /* Modals — centered on desktop, not bottom sheet */
+  .overlay{align-items:center;}
+  .modal{border-radius:18px;transform:scale(.95);max-width:520px;
+    padding-bottom:28px;}
+  .overlay.open .modal{transform:scale(1);}
+  .modal-handle{display:none;}
+
+  /* Page headers */
+  .ph-title{font-size:26px;}
+  .ph-sub{font-size:12px;}
+
+  /* Recap grid more columns */
+  .recap-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));}
+
+  /* Creneau items bigger */
+  .creneau-item{padding:16px 20px;}
+  .cr-title{font-size:15px;}
+  .cr-hours{font-size:13px;}
+  .cr-check{font-size:24px;}
+
+  /* Bottom nav hidden on desktop */
+  .bottom-nav{display:none!important;}
+
+  /* App body no bottom padding for nav */
+  .app-body{padding-bottom:28px;}
+
+  /* Shift/stats details larger */
+  .stat-big{font-size:34px;}
+  .stat-money{font-size:28px;}
+}
+
+/* ── TABLET ── */
+@media(min-width:700px) and (max-width:899px){
+  .app-body{padding:20px 24px;padding-bottom:24px;}
+  .bottom-nav{display:none!important;}
+  .desk-nav{display:flex;}
+  .cards-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+  .week-grid{gap:8px;}
+  .dc-num{font-size:20px;}
+  .overlay{align-items:center;}
+  .modal{border-radius:18px;padding-bottom:24px;max-width:480px;}
+  .modal-handle{display:none;}
+}
+
+/* ── MOBILE ── */
+@media(max-width:700px){
+  .desk-nav{display:none;}
+  .bottom-nav{display:block;}
+  .app-body{padding:16px 14px;padding-bottom:calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);}
+  .week-grid{grid-template-columns:repeat(7,1fr);gap:5px;}
+  .dc-num{font-size:16px;}
+  .stats-row{grid-template-columns:repeat(3,1fr);}
+  .cards-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:400px){
+  .week-grid{gap:3px;}
+  .day-card{padding:8px 3px;}
+  .dc-num{font-size:14px;}
+  .dc-hrs{display:none;}
+}
+
+/* ── SHIFT CARDS (voiturier & manager day view) ── */
+.shift-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:0;}
+.shift-card.mine{border-color:var(--blue);background:rgba(45,110,245,.04);}
+.shift-card.active-shift{border-color:var(--green);background:rgba(24,168,122,.05);}
+.shift-separator{height:1px;background:var(--border);margin:0 4px 0;opacity:.5;}
+.sc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap;}
+.sc-time{font-family:var(--mono);font-size:13px;font-weight:700;}
+.sc-actions{margin-top:12px;}
+
+/* ── START / STOP BUTTONS ── */
+.btn-start{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 18px;border:2px solid var(--green);border-radius:10px;
+  background:transparent;color:var(--green);
+  font-family:var(--font);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;
+}
+.btn-start:hover{background:rgba(24,168,122,.07);}
+.btn-start:active{background:rgba(24,168,122,.14);transform:scale(.98);}
+.btn-stop{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 18px;border:2px solid var(--red);border-radius:10px;
+  background:transparent;color:var(--red);
+  font-family:var(--font);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;
+}
+.btn-stop:hover{background:rgba(224,62,56,.06);}
+.btn-stop:active{background:rgba(224,62,56,.12);transform:scale(.98);}
+
+/* ── GEO BADGE & POINTAGE ── */
+/* ── NOTE BUTTON & BUBBLE ── */
+.note-btn{
+  background:rgba(45,110,245,.1);border:1px solid rgba(45,110,245,.25);
+  border-radius:6px;padding:3px 8px;cursor:pointer;font-size:14px;
+  transition:all .2s;flex-shrink:0;
+}
+.note-btn:active{background:rgba(45,110,245,.2);}
+.note-bubble{
+  background:var(--s1);border:1px solid var(--blue);border-radius:10px;
+  padding:12px 14px;margin:10px 0 6px;font-size:13px;line-height:1.6;
+  color:var(--text);animation:up .2s ease;
+  position:relative;
+}
+.note-bubble::before{
+  content:'';position:absolute;top:-7px;left:16px;
+  width:12px;height:12px;background:var(--s1);
+  border-left:1px solid var(--blue);border-top:1px solid var(--blue);
+  transform:rotate(45deg);
+}
+
+/* ── CHECK CLÉS BANNER ── */
+/* Check clés confirm checkbox highlight on check */
+#confirm-check-cles:checked + label{color:var(--green);}
+
+.check-cles-banner{
+  background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);
+  border-radius:8px;padding:8px 14px;margin-bottom:10px;
+  font-size:13px;font-weight:700;color:#7a5f00;
+  text-align:center;letter-spacing:.5px;
+}
+
+.geo-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  font-family:var(--mono);font-size:9px;
+  color:var(--blue);background:rgba(45,110,245,.07);
+  padding:2px 7px;border-radius:4px;text-decoration:none;
+  margin-top:4px;
+}
+.geo-badge:hover{background:rgba(45,110,245,.13);}
+.pointage-info{font-family:var(--mono);font-size:10px;color:var(--green);margin-top:6px;}
+
+/* ── STATS PANEL ── */
+.stats-panel{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:14px;}
+.stats-result{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:14px;}
+.stat-big{font-size:28px;font-weight:800;font-family:var(--mono);color:var(--text);}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+.stat-money{font-size:22px;font-weight:800;font-family:var(--mono);color:var(--green);margin-top:10px;}
+.stat-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+.stat-detail-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-height:44px;}
+.stat-comment-btn{
+  background:rgba(45,110,245,.1);border:1px solid rgba(45,110,245,.25);
+  border-radius:8px;padding:8px 12px;cursor:pointer;font-size:16px;
+  transition:all .2s;flex-shrink:0;
+  min-width:44px;min-height:44px;
+  display:inline-flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.stat-comment-btn:active{background:rgba(45,110,245,.2);transform:scale(.93);}
+.stat-retard-btn{
+  background:rgba(224,62,56,.1);border:1px solid rgba(224,62,56,.25);
+  border-radius:8px;padding:8px 12px;cursor:pointer;font-size:16px;
+  transition:all .2s;flex-shrink:0;
+  min-width:44px;min-height:44px;
+  display:inline-flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.stat-retard-btn:active{background:rgba(224,62,56,.25);transform:scale(.93);}
+
+/* ── OV CELL ── */
+.ov-cell{text-align:center;}
+.day-past-shifts{opacity:.6;cursor:pointer;}
+.day-past-shifts:hover{opacity:.9;border-color:var(--muted);}
+.shift-card-past{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:0;opacity:.85;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="screen-loading">
+  <div class="spinner"></div>
+  <div class="loading-txt" id="loading-txt">Connexion...</div>
+</div>
+
+<!-- SETUP -->
+<div id="screen-setup" style="display:none">
+  <div class="setup-box">
+    <div class="setup-logo">Plan<span>Air</span></div>
+    <div class="setup-tag">✈ CONFIGURATION INITIALE</div>
+    <div class="alert a-warn">Suivez les étapes pour connecter votre base de données Supabase.</div>
+
+    <div class="step-lbl"><span class="step-n">1</span> Créez un projet sur supabase.com → SQL Editor → copiez ce code :</div>
+    <div class="sql-box" onclick="copySQL()" id="sql-txt" title="Cliquer pour copier">CREATE TABLE voituriers (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nom text NOT NULL,
+  tel text,
+  pin text NOT NULL,
+  couleur int DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE disponibilites (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  voiturier_id uuid REFERENCES voituriers(id) ON DELETE CASCADE,
+  date_jour text NOT NULL,
+  disponible boolean DEFAULT false,
+  heure_debut text,
+  heure_fin text,
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE(voiturier_id, date_jour)
+);
+
+CREATE TABLE shifts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nom text NOT NULL,
+  date text NOT NULL,
+  debut text NOT NULL,
+  fin text NOT NULL,
+  notes text,
+  voiturier_id uuid REFERENCES voituriers(id) ON DELETE SET NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE voituriers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disponibilites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shifts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "open" ON voituriers FOR ALL USING (true);
+CREATE POLICY "open" ON disponibilites FOR ALL USING (true);
+CREATE POLICY "open" ON shifts FOR ALL USING (true);</div>
+    <p style="font-size:10px;color:var(--muted);margin:4px 0 4px">👆 Cliquez pour copier · Puis Run dans Supabase</p>
+
+    <div class="step-lbl"><span class="step-n">2</span> Entrez vos identifiants (Settings → API dans Supabase)</div>
+    <div class="form-group"><label class="form-label">URL du projet</label><input class="form-input" id="su-url" placeholder="https://xxxx.supabase.co" type="url"></div>
+    <div class="form-group"><label class="form-label">Clé anon (public)</label><input class="form-input" id="su-key" placeholder="eyJhbGci..." type="text"></div>
+
+    <div class="step-lbl"><span class="step-n">3</span> Mot de passe Manager</div>
+    <div class="form-group"><label class="form-label">Choisissez un mot de passe</label><input class="form-input" id="su-pw" placeholder="Minimum 6 caractères" type="password"></div>
+
+    <div id="setup-err" class="alert a-err" style="display:none"></div>
+    <button class="btn btn-primary btn-block" onclick="doSetup()" id="setup-btn">🚀 Lancer l'application</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login" style="display:none">
+  <div class="login-box">
+    <div class="brand">
+      <div class="brand-icon">✈️</div>
+      <div class="brand-name">Plan<span>Air</span></div>
+      <div class="brand-sub">SERVICE VOITURIER</div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('v')">Voiturier</button>
+      <button class="tab" onclick="switchTab('m')">Manager</button>
+    </div>
+    <div id="tab-v">
+      <div class="form-group"><label class="form-label">Votre nom</label><select class="form-input" id="login-sel"></select></div>
+      <div class="form-group">
+        <label class="form-label">Code PIN</label>
+        <div class="pin-row">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="p0">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="p1">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="p2">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="p3">
+        </div>
+      </div>
+      <div id="v-err" class="alert a-err" style="display:none"></div>
+      <button class="btn btn-primary btn-block" onclick="loginV()">Se connecter</button>
+    </div>
+    <div id="tab-m" style="display:none">
+      <div class="form-group">
+        <label class="form-label">PIN Manager (4 chiffres)</label>
+        <div class="pin-row">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="m0">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="m1">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="m2">
+          <input class="pin-box" maxlength="1" type="password" inputmode="numeric" id="m3">
+        </div>
+      </div>
+      <div id="m-err" class="alert a-err" style="display:none"></div>
+      <button class="btn btn-primary btn-block" onclick="loginM()">Accès Manager</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" style="display:none;flex-direction:column">
+
+  <!-- Top header -->
+  <header class="app-header">
+    <div class="app-logo">Plan<span>Air</span></div>
+    <!-- Desktop nav -->
+    <nav class="desk-nav" id="desk-nav"></nav>
+    <!-- User info + logout -->
+    <div class="hdr-right">
+      <div class="hdr-av" id="hdr-av"></div>
+      <div class="hdr-info">
+        <div class="hdr-nm" id="hdr-nm"></div>
+        <div class="hdr-rl" id="hdr-rl"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="notif-btn" onclick="promptNotifications()" style="padding:6px 10px;display:none" title="Activer les notifications">🔔</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" style="padding:6px 10px">↩</button>
+    </div>
+  </header>
+
+  <!-- Pages -->
+  <div class="app-body">
+
+    <!-- VOITURIER: AGENDA -->
+    <div class="page" id="page-agenda">
+      <div class="ph">
+        <div><div class="ph-title">Mon agenda</div><div class="ph-sub">Remplissez vos disponibilités</div></div>
+      </div>
+      <div class="week-nav">
+        <button class="btn btn-secondary btn-sm" onclick="shiftWeek(-1)" id="btn-prev">← Préc.</button>
+        <div class="week-lbl" id="wk-lbl"></div>
+        <button class="btn btn-secondary btn-sm" onclick="shiftWeek(1)">Suiv. →</button>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-top"><span id="prog-txt">0/7</span><span id="prog-pct">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+      <div class="week-grid" id="week-grid"></div>
+      <div class="day-panel" id="day-panel" style="display:none">
+        <div class="dp-head">
+          <div class="dp-datebadge">
+            <div class="dp-dname" id="dp-dname"></div>
+            <div class="dp-dnum" id="dp-dnum"></div>
+            <div class="dp-dmonth" id="dp-dmonth"></div>
+          </div>
+          <div><div class="dp-title" id="dp-title"></div><div class="dp-sub">Disponible ce jour ?</div></div>
+        </div>
+        <div class="choice-row">
+          <div class="choice-btn" id="ch-yes" onclick="setChoice(true)"><div class="ce">✅</div><div class="cl">Disponible</div><div class="cs">Je travaille</div></div>
+          <div class="choice-btn" id="ch-no" onclick="setChoice(false)"><div class="ce">❌</div><div class="cl">Indisponible</div><div class="cs">Je ne travaille pas</div></div>
+        </div>
+        <div class="time-panel" id="time-panel" style="display:none">
+          <div class="form-label" style="margin-bottom:14px">⏰ Mes créneaux — cochez ceux où vous serez présent</div>
+          <div class="creneau-list">
+            <div class="creneau-item" id="cr0" onclick="toggleCreneau(0)">
+              <div class="cr-check" id="cr0-check">☐</div>
+              <div class="cr-info">
+                <div class="cr-title">Matin</div>
+                <div class="cr-hours" id="cr0-hours"></div>
+              </div>
+              <button class="cr-edit-btn" onclick="event.stopPropagation();editCreneau(event,0)" title="Modifier horaires">✏️</button>
+            </div>
+            <div class="creneau-item" id="cr1" onclick="toggleCreneau(1)">
+              <div class="cr-check" id="cr1-check">☐</div>
+              <div class="cr-info">
+                <div class="cr-title">Après-midi</div>
+                <div class="cr-hours" id="cr1-hours">À partir de 13h</div>
+              </div>
+              <button class="cr-edit-btn" onclick="event.stopPropagation();editCreneau(event,1)" title="Modifier horaires">✏️</button>
+            </div>
+            <div class="creneau-item" id="cr2" onclick="toggleCreneau(2)">
+              <div class="cr-check" id="cr2-check">☐</div>
+              <div class="cr-info">
+                <div class="cr-title">Soir / Nuit</div>
+                <div class="cr-hours" id="cr2-hours">À partir de 19h</div>
+              </div>
+              <button class="cr-edit-btn" onclick="event.stopPropagation();editCreneau(event,2)" title="Modifier horaires">✏️</button>
+            </div>
+          </div>
+        </div>
+        <div class="dp-nav">
+          <button class="btn btn-ghost btn-sm" onclick="closeDayPanel()">← Retour</button>
+          <div class="dp-ctr" id="dp-ctr"></div>
+          <button class="btn btn-primary" onclick="saveDay()">Valider ✓</button>
+        </div>
+      </div>
+      <div id="recap-section" style="display:none">
+        <div class="recap-alert">🎉 Semaine complète !</div>
+        <div class="recap-grid" id="recap-grid"></div>
+        <div style="margin-top:14px"><button class="btn btn-secondary btn-sm" onclick="editWeek()">✏️ Modifier</button></div>
+      </div>
+    </div>
+
+    <!-- VOITURIER: MES SHIFTS -->
+    <div class="page" id="page-mes-shifts">
+      <div class="ph">
+        <div><div class="ph-title">Shifts</div><div class="ph-sub">Tous les shifts de la semaine</div></div>
+      </div>
+      <div class="week-nav">
+        <button class="btn btn-secondary btn-sm" onclick="shiftShiftsWeek(-1)" id="btn-prev-sh">← Préc.</button>
+        <div class="week-lbl" id="sh-wk-lbl"></div>
+        <button class="btn btn-secondary btn-sm" onclick="shiftShiftsWeek(1)">Suiv. →</button>
+      </div>
+      <div class="week-grid" id="sh-week-grid"></div>
+      <div id="sh-day-detail" style="display:none">
+        <div class="day-panel">
+          <div class="dp-head">
+            <div class="dp-datebadge">
+              <div class="dp-dname" id="sh-dp-dname"></div>
+              <div class="dp-dnum" id="sh-dp-dnum"></div>
+              <div class="dp-dmonth" id="sh-dp-dmonth"></div>
+            </div>
+            <div>
+              <div class="dp-title" id="sh-dp-title"></div>
+              <div class="dp-sub" id="sh-dp-sub"></div>
+            </div>
+          </div>
+          <div id="sh-dp-list"></div>
+          <div style="margin-top:14px">
+            <button class="btn btn-ghost btn-sm" onclick="closeShiftDetail()">← Retour</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANAGER: ÉQUIPE -->
+    <div class="page" id="page-equipe">
+      <div class="ph">
+        <div><div class="ph-title">Équipe</div><div class="ph-sub" id="equipe-sub"></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="exportAllCSV()">⬇️ Export CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openMo('mo-add-v')">+ Ajouter</button>
+        </div>
+      </div>
+      <div class="cards-grid" id="equipe-grid"></div>
+    </div>
+
+    <!-- MANAGER: SHIFTS -->
+    <div class="page" id="page-shifts">
+      <div class="ph">
+        <div><div class="ph-title">Shifts</div><div class="ph-sub" id="shifts-sub"></div></div>
+        <button class="btn btn-primary btn-sm" onclick="openMo('mo-add-s')">+ Créer</button>
+      </div>
+      <div class="week-nav">
+        <button class="btn btn-secondary btn-sm" onclick="shiftMgrShiftsWeek(-1)" id="btn-prev-msh">← Préc.</button>
+        <div class="week-lbl" id="msh-wk-lbl"></div>
+        <button class="btn btn-secondary btn-sm" onclick="shiftMgrShiftsWeek(1)">Suiv. →</button>
+      </div>
+      <div class="week-grid" id="msh-week-grid"></div>
+      <div id="msh-day-detail" style="display:none">
+        <div class="day-panel">
+          <div class="dp-head">
+            <div class="dp-datebadge">
+              <div class="dp-dname" id="msh-dp-dname"></div>
+              <div class="dp-dnum" id="msh-dp-dnum"></div>
+              <div class="dp-dmonth" id="msh-dp-dmonth"></div>
+            </div>
+            <div>
+              <div class="dp-title" id="msh-dp-title"></div>
+              <div class="dp-sub" id="msh-dp-sub"></div>
+            </div>
+          </div>
+          <div id="msh-dp-list"></div>
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+            <button class="btn btn-primary btn-block" id="msh-create-btn">+ Créer un shift ce jour</button>
+            <button class="btn btn-secondary btn-block" onclick="sendNotifToDay(activeMgrShiftDay)">🔔 Notifier les voituriers</button>
+            <button class="btn btn-ghost btn-sm" onclick="closeMgrShiftDetail()">← Retour</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANAGER: PLANNING -->
+    <div class="page" id="page-planning">
+      <div class="ph">
+        <div><div class="ph-title">Planning</div><div class="ph-sub">Attribution auto & manuelle</div></div>
+        <button class="btn btn-success btn-sm" onclick="autoAssign()">⚡ Auto</button>
+      </div>
+      <div class="week-nav">
+        <button class="btn btn-secondary btn-sm" onclick="shiftPlanningWk(-1)" id="btn-prev-plan">← Préc.</button>
+        <div class="week-lbl" id="plan-wk-lbl"></div>
+        <button class="btn btn-secondary btn-sm" onclick="shiftPlanningWk(1)">Suiv. →</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="st-tot">0</div><div class="stat-lbl">Shifts</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-ok">0</div><div class="stat-lbl">Attribués</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-pend">0</div><div class="stat-lbl">En attente</div></div>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Date</th><th>Horaire</th><th>Voiturier</th><th></th></tr></thead>
+        <tbody id="plan-body"></tbody></table>
+        <div class="empty" id="plan-empty" style="display:none"><div class="empty-icon">📋</div><div class="empty-txt">Aucun shift.</div></div>
+      </div>
+    </div>
+
+    <!-- MANAGER: DISPOS -->
+    <div class="page" id="page-dispos">
+      <div class="ph">
+        <div><div class="ph-title">Disponibilités</div><div class="ph-sub">Vue équipe par semaine</div></div>
+        <div class="week-nav" style="margin:0">
+          <button class="btn btn-secondary btn-sm" onclick="shiftMgrWk(-1)">←</button>
+          <div class="week-lbl" id="mgr-wk-lbl"></div>
+          <button class="btn btn-secondary btn-sm" onclick="shiftMgrWk(1)">→</button>
+        </div>
+      </div>
+      <div id="dispos-body"></div>
+    </div>
+
+  </div><!-- /app-body -->
+
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="bottom-nav-inner" id="bottom-nav-inner"></div>
+  </nav>
+
+</div><!-- /screen-app -->
+
+<!-- MODALS (bottom sheet style) -->
+<!-- Add voiturier -->
+<div class="overlay" id="mo-add-v">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nouveau voiturier</div>
+    <div class="form-group"><label class="form-label">Nom complet</label><input class="form-input" id="nv-nom" placeholder="Jean Dupont"></div>
+    <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="nv-tel" placeholder="06 XX XX XX XX"></div>
+    <div class="form-group">
+      <label class="form-label">PIN (4 chiffres)</label>
+      <div class="pin-row" style="justify-content:flex-start">
+        <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="np0">
+        <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="np1">
+        <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="np2">
+        <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="np3">
+      </div>
+    </div>
+    <div id="nv-err" class="alert a-err" style="display:none"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-add-v')">Annuler</button>
+      <button class="btn btn-primary" onclick="addVoiturier()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit PIN -->
+<div class="overlay" id="mo-pin">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier le PIN</div>
+    <div class="alert a-warn">Communiquez le nouveau PIN au voiturier.</div>
+    <div class="pin-row" style="justify-content:flex-start">
+      <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="ep0">
+      <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="ep1">
+      <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="ep2">
+      <input class="pin-box" maxlength="1" type="text" inputmode="numeric" id="ep3">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-pin')">Annuler</button>
+      <button class="btn btn-primary" onclick="savePin()">Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add shift -->
+<div class="overlay" id="mo-add-s">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Créer un shift</div>
+    <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="ns-date" type="date"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+      <div class="form-group"><label class="form-label">Heure de début</label><input class="form-input" id="ns-deb" type="time"></div>
+      <div class="form-group"><label class="form-label">Heure de fin</label><input class="form-input" id="ns-fin" type="time"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note pour le voiturier (optionnel)</label>
+      <textarea class="form-input" id="ns-note" rows="3" placeholder="Instructions, informations particulières..." style="resize:none;line-height:1.5"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;cursor:pointer" onclick="toggleNsCheckCles()">
+      <input type="checkbox" id="ns-check-cles" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
+      <label for="ns-check-cles" style="font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.3px">🔑 CHECK CLÉS</label>
+    </div>
+    <div id="ns-err" class="alert a-err" style="display:none"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-add-s')">Annuler</button>
+      <button class="btn btn-primary" onclick="addShift()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign -->
+<div class="overlay" id="mo-assign">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Assigner un voiturier</div>
+    <div class="alert a-info" id="assign-info"></div>
+    <div class="form-group"><label class="form-label">Voiturier</label><select class="form-input" id="assign-sel"></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-assign')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveAssign()">Assigner</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Creneau -->
+<div class="overlay" id="mo-edit-cr">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier le créneau</div>
+    <div class="alert a-info" style="font-size:12px;margin-bottom:16px" id="ecr-day-label"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+      <div class="form-group"><label class="form-label">Heure de début</label><input class="form-input" id="ecr-debut" type="time"></div>
+      <div class="form-group"><label class="form-label">Heure de fin</label><input class="form-input" id="ecr-fin" type="time"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Appliquer à</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s2);border:2px solid var(--border);border-radius:10px;cursor:pointer" id="ecr-scope-day-lbl">
+          <input type="radio" name="ecr-scope" value="day" id="ecr-scope-day" checked style="accent-color:var(--accent);width:16px;height:16px">
+          <div><div style="font-weight:700;font-size:13px">Ce jour uniquement</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)" id="ecr-scope-date"></div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s2);border:2px solid var(--border);border-radius:10px;cursor:pointer" id="ecr-scope-all-lbl">
+          <input type="radio" name="ecr-scope" value="all" id="ecr-scope-all" style="accent-color:var(--accent);width:16px;height:16px">
+          <div><div style="font-weight:700;font-size:13px">Tous les jours à venir</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">Modifie le créneau par défaut</div></div>
+        </label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="resetCreneau()">↺ Défaut</button>
+      <button class="btn btn-secondary" onclick="closeMo('mo-edit-cr')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEditCreneau()">Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Shift (Manager) -->
+<div class="overlay" id="mo-edit-s">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Modifier le shift</div>
+    <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="es-date" type="date"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+      <div class="form-group"><label class="form-label">Début</label><input class="form-input" id="es-deb" type="time"></div>
+      <div class="form-group"><label class="form-label">Fin</label><input class="form-input" id="es-fin" type="time"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note pour le voiturier (optionnel)</label>
+      <textarea class="form-input" id="es-note" rows="3" placeholder="Instructions, informations particulières..." style="resize:none;line-height:1.5"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;cursor:pointer" onclick="toggleEsCheckCles()">
+      <input type="checkbox" id="es-check-cles" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
+      <label for="es-check-cles" style="font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.3px">🔑 CHECK CLÉS</label>
+    </div>
+    <div id="es-err" class="alert a-err" style="display:none"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-edit-s')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEditShift()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fin de shift (retard ou non) -->
+<div class="overlay" id="mo-retard">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mo-retard-title">Fin de shift</div>
+    <div class="alert a-warn" id="retard-info" style="display:none"></div>
+    <div class="form-group">
+      <label class="form-label" id="retard-lbl">Commentaire de fin de shift (optionnel)</label>
+      <textarea class="form-input" id="retard-txt" rows="4" placeholder="Laissez un commentaire si vous le souhaitez..." style="resize:none;line-height:1.5"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-retard')">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmEndShift()">⏹ Terminer le shift</button>
+    </div>
+  </div>
+</div>
+
+<!-- Voiturier Stats -->
+<div class="overlay" id="mo-stats-v">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="stats-v-name">Heures travaillées</div>
+    <div class="alert a-info" style="font-size:12px">Basé uniquement sur les shifts démarrés ET terminés (pointage réel).</div>
+    <div class="stats-panel">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+        <div class="form-group">
+          <label class="form-label">Du</label>
+          <input class="form-input" id="stats-date-from" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Au</label>
+          <input class="form-input" id="stats-date-to" type="date">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="calcStats()">Calculer</button>
+    </div>
+    <div class="stats-result" id="stats-result" style="display:none">
+      <div class="stat-row-2">
+        <div>
+          <div class="stat-big" id="stats-heures">0h00</div>
+          <div class="stat-sub">heures travaillées</div>
+        </div>
+        <div>
+          <div class="stat-big" id="stats-shifts">0</div>
+          <div class="stat-sub">shifts effectués</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px">
+        <div class="stat-money" id="stats-euros">0,00 €</div>
+        <div class="stat-sub">à 12 € / heure</div>
+      </div>
+      <div id="stats-detail" style="margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.8"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-stats-v')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Check Clés Confirmation -->
+<div class="overlay" id="mo-check-cles">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔑 Confirmation CHECK CLÉS</div>
+    <div class="alert a-warn" style="font-size:14px;line-height:1.6;text-align:center;padding:16px">
+      Avant de terminer votre shift, confirmez avoir effectué le <strong>CHECK CLÉS</strong>.
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 14px;background:var(--s2);border:2px solid var(--border);border-radius:12px;margin-bottom:4px;cursor:pointer" onclick="toggleCheckClesConfirm()">
+      <input type="checkbox" id="confirm-check-cles" style="width:22px;height:22px;accent-color:var(--green);cursor:pointer;flex-shrink:0">
+      <label for="confirm-check-cles" style="font-size:14px;font-weight:700;cursor:pointer;line-height:1.4">
+        Je confirme avoir effectué le check clés et que les clés sont en sécurité.
+      </label>
+    </div>
+    <div id="check-cles-err" class="alert a-err" style="display:none;margin-top:12px">
+      ⚠️ Vous devez confirmer le check clés avant de terminer.
+    </div>
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="btn btn-secondary" onclick="closeMo('mo-check-cles')">Annuler</button>
+      <button class="btn btn-stop" style="border-radius:10px;padding:11px 18px" onclick="confirmCheckClesAndEnd()">⏹ Terminer le shift</button>
+    </div>
+  </div>
+</div>
+
+<!-- Retard Detail Modal -->
+<div class="overlay" id="mo-retard-detail">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⏰ Détail du retard</div>
+    <div id="retard-detail-content"></div>
+    <div id="retard-detail-goto" style="display:none;margin-top:14px">
+      <button class="btn btn-secondary btn-block" onclick="gotoShiftDate()">
+        📋 Voir tous les shifts de cette journée
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-retard-detail')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Day Shifts Overview (from RH modal) -->
+<div class="overlay" id="mo-day-shifts">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="day-shifts-title">Shifts de la journée</div>
+    <div id="day-shifts-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMo('mo-day-shifts')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════
+const SK_URL='pa_sb_url', SK_KEY='pa_sb_key', SK_MPW='pa_mgr_pw';
+const COLORS=['c0','c1','c2','c3','c4','c5','c6','c7'];
+const DS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const DL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const MS=['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+const ML=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+let SB=null, ME=null;
+let voituriers=[], shifts=[], dispos=[], pointages=[];
+let weekOff=0, mgrWkOff=0, activeDay=null, dayChoice=null;
+let editPinId=null, assignSid=null, editShiftId=null;
+let pendingEndShiftId=null, pendingEndLat=null, pendingEndLng=null;
+let mgrShiftsWeekOff=0, activeMgrShiftDay=null;
+let planningWeekOff=0;
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+async function init() {
+  // Identifiants intégrés — pas de configuration requise
+  const url='https://wttkngwuvujkwudrzejh.supabase.co';
+  const key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0dGtuZ3d1dnVqa3d1ZHJ6ZWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NTQ4NDQsImV4cCI6MjA5MzEzMDg0NH0.FibtnMl5OYeI4vTPIZOwaOS8MrckeVI_DtYcY6J-9hI';
+  try {
+    $('loading-txt').textContent='Connexion...';
+    SB=window.supabase.createClient(url,key);
+    const {error}=await SB.from('voituriers').select('id').limit(1);
+    if(error) throw error;
+    $('loading-txt').textContent='Chargement...';
+    await loadAll();
+    hide('screen-loading'); showLogin();
+  } catch(e){
+    hide('screen-loading');
+    $('loading-txt').textContent='Erreur de connexion. Rechargez la page.';
+    show('screen-loading');
+  }
+}
+
+async function doSetup() {
+  const url=$v('su-url'), key=$v('su-key'), pw=$v('su-pw');
+  const err=$('setup-err'); err.style.display='none';
+  if(!url||!key||!pw){ showErr(err,'Tous les champs sont requis.'); return; }
+  if(pw.length<6){ showErr(err,'Mot de passe trop court (6 car. min).'); return; }
+  const btn=$('setup-btn'); btn.textContent='Connexion...'; btn.disabled=true;
+  try {
+    SB=window.supabase.createClient(url,key);
+    const {error}=await SB.from('voituriers').select('id').limit(1);
+    if(error) throw error;
+    ls_set(SK_URL,url); ls_set(SK_KEY,key); ls_set(SK_MPW,pw);
+    await loadAll();
+    hide('screen-setup'); showLogin();
+  } catch(e){
+    showErr(err,'Connexion impossible. Vérifiez l\'URL et la clé. '+e.message);
+    btn.textContent='🚀 Lancer l\'application'; btn.disabled=false;
+  }
+}
+
+function copySQL(){
+  navigator.clipboard.writeText($('sql-txt').innerText).then(()=>toast('✅ SQL copié !'));
+}
+
+async function loadAll(){
+  const [vr,sr,dr,pr]=await Promise.all([
+    SB.from('voituriers').select('*').order('nom'),
+    SB.from('shifts').select('*').order('date').order('debut'),
+    SB.from('disponibilites').select('*'),
+    SB.from('pointages').select('*')
+  ]);
+  voituriers=vr.data||[]; shifts=sr.data||[]; dispos=dr.data||[]; pointages=pr.data||[];
+}
+
+// ═══════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════
+function showLogin(){
+  hide('screen-app'); hide('screen-setup');
+  show('screen-login');
+  fillSel();
+  initPin(['p0','p1','p2','p3'],loginV);
+  initPin(['m0','m1','m2','m3'],loginM);
+}
+
+function fillSel(){
+  const s=$('login-sel');
+  s.innerHTML=voituriers.length
+    ?'<option value="">— Sélectionnez votre nom —</option>'+voituriers.map(v=>`<option value="${v.id}">${v.nom}</option>`).join('')
+    :'<option value="">Aucun voiturier enregistré</option>';
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',t==='v'?i===0:i===1));
+  $('tab-v').style.display=t==='v'?'block':'none';
+  $('tab-m').style.display=t==='m'?'block':'none';
+}
+
+function loginV(){
+  const id=$('login-sel').value;
+  const pin=['p0','p1','p2','p3'].map(i=>$(i).value).join('');
+  const err=$('v-err'); err.style.display='none';
+  if(!id){ showErr(err,'Sélectionnez votre nom.'); return; }
+  if(pin.length<4){ showErr(err,'Entrez votre PIN.'); return; }
+  const v=voituriers.find(x=>x.id===id);
+  if(!v||v.pin!==pin){ showErr(err,'PIN incorrect.'); return; }
+  ME={id:v.id,nom:v.nom,role:'voiturier',couleur:v.couleur||0};
+  enterApp();
+}
+
+function loginM(){
+  const pin=['m0','m1','m2','m3'].map(id=>$(id).value).join('');
+  const err=$('m-err'); err.style.display='none';
+  if(pin!=='7510'){ showErr(err,'PIN incorrect.'); return; }
+  ME={id:'manager',nom:'Manager',role:'manager',couleur:0};
+  enterApp();
+}
+
+function logout(){
+  ME=null; weekOff=0;
+  ['p0','p1','p2','p3'].forEach(id=>$(id).value='');
+  ['m0','m1','m2','m3'].forEach(id=>$(id).value='');
+  $('screen-app').style.display='none';
+  showLogin();
+}
+
+// ═══════════════════════════════════════════
+//  APP
+// ═══════════════════════════════════════════
+function enterApp(){
+  hide('screen-login');
+  $('screen-app').style.display='flex';
+  const av=$('hdr-av');
+  av.textContent=initials(ME.nom);
+  av.className='hdr-av '+COLORS[ME.couleur%8];
+  $('hdr-nm').textContent=ME.nom;
+  $('hdr-rl').textContent=ME.role==='manager'?'⚙️ Manager':'🚗 Voiturier';
+  buildNav();
+  if(ME.role==='voiturier'){
+    $('notif-btn').style.display='inline-flex';
+    gotoPage('agenda'); renderMyShifts();
+  } else {
+    $('notif-btn').style.display='none';
+    gotoPage('equipe'); renderPlanning();
+  }
+}
+
+function buildNav(){
+  const pages=ME.role==='voiturier'
+    ?[['agenda','📅','Agenda'],['mes-shifts','🚗','Shifts']]
+    :[['equipe','👥','Équipe'],['shifts','🕐','Shifts'],['planning','📋','Planning'],['dispos','📊','Dispos']];
+
+  // Desktop top nav
+  $('desk-nav').innerHTML=pages.map(([id,,lbl])=>
+    `<button class="nav-btn" id="dnav-${id}" onclick="gotoPage('${id}')">${lbl}</button>`
+  ).join('');
+
+  // Mobile bottom nav
+  $('bottom-nav-inner').innerHTML=pages.map(([id,icon,lbl])=>
+    `<button class="bnav-btn" id="bnav-${id}" onclick="gotoPage('${id}')">
+      <span class="bnav-icon">${icon}</span>
+      <span class="bnav-label">${lbl}</span>
+      <span class="bnav-dot"></span>
+    </button>`
+  ).join('');
+}
+
+function gotoPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn,.bnav-btn').forEach(b=>b.classList.remove('active'));
+  $('page-'+name)?.classList.add('active');
+  $('dnav-'+name)?.classList.add('active');
+  $('bnav-'+name)?.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(name==='agenda')    renderAgenda();
+  if(name==='mes-shifts')renderMyShifts();
+  if(name==='equipe')    renderEquipe();
+  if(name==='shifts')    { renderShifts(); }
+  if(name==='planning')  { planningWeekOff=0; renderPlanning(); }
+  if(name==='dispos')    renderDispos();
+}
+
+// ═══════════════════════════════════════════
+//  WEEKS
+// ═══════════════════════════════════════════
+function weekDates(off=0){
+  const now=new Date(),dow=now.getDay()||7;
+  const mon=new Date(now); mon.setDate(now.getDate()-dow+1+off*7);
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d;});
+}
+function iso(d){return d.toISOString().split('T')[0];}
+function today(){return iso(new Date());}
+function fmtWk(off){
+  const[a,b]=[weekDates(off)[0],weekDates(off)[6]];
+  return a.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' — '+b.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+}
+function diIdx(d){return(d.getDay()||7)-1;}
+
+// ═══════════════════════════════════════════
+//  AGENDA
+// ═══════════════════════════════════════════
+function renderAgenda(){
+  $('wk-lbl').textContent=fmtWk(weekOff);
+  $('btn-prev').disabled=weekOff<=0;
+  $('btn-prev').style.opacity=weekOff<=0?'.3':'1';
+
+  const dates=weekDates(weekOff);
+  const todayIso=today();
+  const futDates=dates.filter(d=>iso(d)>=todayIso);
+  const filled=futDates.filter(d=>dispos.some(x=>x.voiturier_id===ME.id&&x.date_jour===iso(d))).length;
+  const total=futDates.length;
+  const pct=total?Math.round(filled/total*100):0;
+  $('prog-txt').textContent=`${filled}/${total} jours renseignés`;
+  $('prog-pct').textContent=pct+'%';
+  $('prog-fill').style.width=pct+'%';
+
+  $('week-grid').innerHTML=dates.map((d,i)=>{
+    const diso=iso(d);
+    const isPast=diso<todayIso,isToday=diso===todayIso;
+    const rec=dispos.find(x=>x.voiturier_id===ME.id&&x.date_jour===diso);
+    let cls='day-card';
+    if(isPast) cls+=' past';
+    if(isToday) cls+=' today';
+    if(!isPast&&rec?.disponible===true) cls+=' dispo';
+    if(!isPast&&rec?.disponible===false) cls+=' indispo';
+    if(diso===activeDay) cls+=' editing';
+    const icon=rec?(rec.disponible?'✅':'❌'):'';
+    let hrs='';
+    if(rec?.disponible&&rec.heure_debut){
+      try{const sl=JSON.parse(rec.heure_debut);if(Array.isArray(sl))hrs=sl.map(s=>s.label||s.d+'–'+s.f).join(', ');}
+      catch(e){hrs=rec.heure_debut;}
+    };
+    return `<div class="${cls}" onclick="${isPast?'':` openDay('${diso}')`}">
+      <div class="dc-name">${DS[i]}</div>
+      <div class="dc-num">${d.getDate()}</div>
+      <div class="dc-month">${MS[d.getMonth()]}</div>
+      <div class="dc-icon">${icon}</div>
+      <div class="dc-hrs">${hrs}</div>
+    </div>`;
+  }).join('');
+
+  if(filled===total&&total>0){$('recap-section').style.display='block';buildRecap(futDates);}
+  else $('recap-section').style.display='none';
+}
+
+function shiftWeek(dir){
+  if(weekOff+dir<0)return;
+  weekOff+=dir; activeDay=null;
+  closeDayPanel(); renderAgenda();
+}
+
+// Helper: check if voiturier has assigned shift on a date
+function hasAssignedShift(diso){
+  return shifts.some(s=>s.voiturier_id===ME.id&&s.date===diso);
+}
+// Helper: check if date is within 48h from now
+function isWithin48h(diso){
+  const now=new Date();
+  const target=new Date(diso+'T00:00:00');
+  return (target-now)<(48*60*60*1000);
+}
+
+// Global flag for lock state of current open day
+let dayLocked=false;
+
+function openDay(diso){
+  activeDay=diso; dayChoice=null;
+  const d=new Date(diso+'T00:00:00'),i=diIdx(d);
+  $('dp-dname').textContent=DS[i];
+  $('dp-dnum').textContent=d.getDate();
+  $('dp-dmonth').textContent=ML[d.getMonth()];
+  $('dp-title').textContent=DL[i]+' '+d.getDate()+' '+ML[d.getMonth()];
+
+  // Determine lock state
+  dayLocked=hasAssignedShift(diso);
+
+  $('ch-yes').className='choice-btn';
+  $('ch-no').className='choice-btn';
+  $('time-panel').style.display='none';
+  const rec=dispos.find(x=>x.voiturier_id===ME.id&&x.date_jour===diso);
+  checkedCr=[false,false,false];
+  if(rec){
+    setChoice(rec.disponible,false);
+    if(rec.disponible){
+      try {
+        const saved=JSON.parse(rec.heure_debut||'[]');
+        if(Array.isArray(saved)&&saved.length){
+          saved.forEach(s=>{
+            const i=creneaux.findIndex(c=>c.d===s.d&&c.f===s.f);
+            if(i>-1) checkedCr[i]=true;
+          });
+        }
+      } catch(e){}
+    }
+  }
+  renderCreneaux();
+
+  // Show lock banner if needed
+  const banner=$('day-lock-banner');
+  const under48Banner=$('day-48h-banner');
+  if(banner){
+    banner.style.display=dayLocked?'block':'none';
+  }
+  if(under48Banner){
+    under48Banner.style.display=(!dayLocked&&isWithin48h(diso)&&rec)?'block':'none';
+  }
+
+  const futDates=weekDates(weekOff).filter(d2=>iso(d2)>=today());
+  const idx=futDates.findIndex(d2=>iso(d2)===diso);
+  $('dp-ctr').textContent=`Jour ${idx+1} / ${futDates.length}`;
+  $('day-panel').style.display='block';
+  $('recap-section').style.display='none';
+  renderAgenda();
+  setTimeout(()=>$('day-panel').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+// Default creneaux labels & times
+const DEFAULT_CRENEAUX = [
+  {label:'Matin',      d:'03:45', f:'12:00'},
+  {label:'Après-midi', d:'13:00', f:'19:00'},
+  {label:'Soir / Nuit',d:'19:00', f:'01:00'}
+];
+let creneaux = JSON.parse(localStorage.getItem('pa_creneaux')||'null') || DEFAULT_CRENEAUX.map(c=>({...c}));
+let checkedCr = [false,false,false];
+
+function saveCrConfig(){ localStorage.setItem('pa_creneaux', JSON.stringify(creneaux)); }
+
+function setChoice(val,resetTime=true){
+  // Block setting indispo if locked
+  if(val===false&&dayLocked){
+    toast('🔒 Shift assigné — vous ne pouvez pas vous marquer indisponible',true);
+    return;
+  }
+  // Block setting indispo if within 48h and already had dispo
+  const rec=dispos.find(x=>x.voiturier_id===ME.id&&x.date_jour===activeDay);
+  if(val===false&&rec?.disponible&&isWithin48h(activeDay)){
+    toast('⏰ Moins de 48h — vous ne pouvez plus retirer vos disponibilités',true);
+    return;
+  }
+  dayChoice=val;
+  $('ch-yes').className='choice-btn'+(val===true?' sel-yes':'');
+  $('ch-no').className='choice-btn'+(val===false?' sel-no':'');
+  $('time-panel').style.display=val?'block':'none';
+  if(val&&resetTime){ checkedCr=[false,false,false]; }
+  if(val) renderCreneaux();
+}
+
+function fmtT(t){
+  // "03:45" -> "03h45", "12:00" -> "12h00"
+  return t.replace(':','h');
+}
+const CR_DISPLAY = [
+  '',              // Matin : pas de sous-titre
+  'À partir de 13h', // Après-midi
+  'À partir de 19h'  // Soir / Nuit
+];
+
+function renderCreneaux(){
+  const active=getActiveCraneaux();
+  active.forEach((cr,i)=>{
+    const item=$('cr'+i);
+    const chk=$('cr'+i+'-check');
+    const hrs=$('cr'+i+'-hours');
+    if(item) item.className='creneau-item'+(checkedCr[i]?' checked':'');
+    if(chk) chk.textContent=checkedCr[i]?'☑':'☐';
+    // Use custom display text, or fallback to hours if overridden
+    const isOverridden=(dayCreneauOverrides[activeDay]||[])[i];
+    if(hrs){
+      if(isOverridden){
+        hrs.textContent=fmtT(cr.d)+' → '+fmtT(cr.f);
+      } else {
+        hrs.textContent=CR_DISPLAY[i]||'';
+      }
+    }
+  });
+}
+
+function toggleCreneau(i){
+  // LOCKED: shift assigned — no changes allowed
+  if(dayLocked){
+    toast('🔒 Shift assigné — modification impossible',true);
+    return;
+  }
+  // 48h rule: can add but not remove
+  if(isWithin48h(activeDay)&&checkedCr[i]===true){
+    toast('⏰ Moins de 48h — vous ne pouvez pas retirer ce créneau',true);
+    return;
+  }
+  checkedCr[i]=!checkedCr[i];
+  renderCreneaux();
+}
+
+function editCreneau(e,i){
+  e.stopPropagation();
+  if(dayLocked){toast('🔒 Shift assigné — modification impossible',true);return;}
+  editingCr=i;
+  const dayOvr=(dayCreneauOverrides[activeDay]||[])[i];
+  const src=dayOvr||creneaux[i];
+  $('ecr-day-label').textContent='Modifier "'+src.label+'"';
+  $('ecr-debut').value=src.d;
+  $('ecr-fin').value=src.f;
+  // Set date label
+  const d=new Date(activeDay+'T00:00:00');
+  const lbl=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  $('ecr-scope-date').textContent=lbl;
+  // Reset to "day" scope
+  $('ecr-scope-day').checked=true;
+  openMo('mo-edit-cr');
+}
+
+let editingCr=0;
+let dayCreneauOverrides={}; // {diso: [{label,d,f},{...},{...}]}
+
+function getActiveCraneaux(){
+  // Return creneaux with day-specific overrides applied
+  return creneaux.map((cr,i)=>{
+    const ovr=(dayCreneauOverrides[activeDay]||[])[i];
+    return ovr||cr;
+  });
+}
+
+function saveEditCreneau(){
+  const d=$('ecr-debut').value, f=$('ecr-fin').value;
+  if(!d||!f||d>=f){toast('❌ Heure de fin doit être après le début',true);return;}
+  const scope=$('ecr-scope-all').checked?'all':'day';
+  if(scope==='all'){
+    // Modify the default creneaux for all future days
+    creneaux[editingCr]={...creneaux[editingCr], d, f};
+    saveCrConfig();
+    toast('✅ Créneau modifié pour tous les jours à venir');
+  } else {
+    // Only modify this day
+    if(!dayCreneauOverrides[activeDay]){
+      dayCreneauOverrides[activeDay]=creneaux.map(c=>({...c}));
+    }
+    dayCreneauOverrides[activeDay][editingCr]={
+      label:creneaux[editingCr].label, d, f
+    };
+    toast('✅ Créneau modifié pour ce jour uniquement');
+  }
+  closeMo('mo-edit-cr');
+  renderCreneaux();
+}
+function resetCreneau(){
+  const scope=$('ecr-scope-all').checked?'all':'day';
+  if(scope==='all'){
+    creneaux[editingCr]={...DEFAULT_CRENEAUX[editingCr]};
+    saveCrConfig();
+  } else if(dayCreneauOverrides[activeDay]){
+    dayCreneauOverrides[activeDay][editingCr]={...DEFAULT_CRENEAUX[editingCr]};
+  }
+  closeMo('mo-edit-cr');
+  renderCreneaux();
+  toast('✅ Créneau réinitialisé');
+}
+
+async function saveDay(){
+  if(dayLocked){toast('🔒 Shift assigné — modification impossible',true);return;}
+  if(dayChoice===null){toast('❌ Choisissez disponible ou non',true);return;}
+  let heureDebut=null,heureFin=null;
+  if(dayChoice){
+    const active=getActiveCraneaux();
+    const selected=active.filter((_,i)=>checkedCr[i]);
+    if(!selected.length){toast('❌ Cochez au moins un créneau',true);return;}
+    heureDebut=JSON.stringify(active.map((cr,i)=>checkedCr[i]?{d:cr.d,f:cr.f,label:cr.label}:null).filter(Boolean));
+    heureFin=selected[selected.length-1].f;
+  }
+  const payload={
+    voiturier_id:ME.id,date_jour:activeDay,
+    disponible:dayChoice,heure_debut:heureDebut,heure_fin:heureFin,
+    updated_at:new Date().toISOString()
+  };
+  const {error}=await SB.from('disponibilites').upsert(payload,{onConflict:'voiturier_id,date_jour'});
+  if(error){toast('❌ Erreur: '+error.message,true);return;}
+  const idx=dispos.findIndex(x=>x.voiturier_id===ME.id&&x.date_jour===activeDay);
+  if(idx>-1) dispos[idx]={...dispos[idx],...payload}; else dispos.push(payload);
+  toast(dayChoice?'✅ Disponibilité enregistrée !':'✅ Indisponible enregistré !');
+  const futDates=weekDates(weekOff).filter(d=>iso(d)>=today());
+  const cur=futDates.findIndex(d=>iso(d)===activeDay);
+  const next=futDates.slice(cur+1).find(d=>!dispos.some(x=>x.voiturier_id===ME.id&&x.date_jour===iso(d)));
+  closeDayPanel(); renderAgenda();
+  if(next) setTimeout(()=>openDay(iso(next)),350);
+}
+
+function closeDayPanel(){activeDay=null;$('day-panel').style.display='none';}
+function editWeek(){$('recap-section').style.display='none';}
+
+function buildRecap(futDates){
+  $('recap-grid').innerHTML=futDates.map(d=>{
+    const diso=iso(d),i=diIdx(d);
+    const rec=dispos.find(x=>x.voiturier_id===ME.id&&x.date_jour===diso);
+    return `<div class="recap-item">
+      <div class="ri-day">${DL[i]} ${d.getDate()}</div>
+      <div class="ri-status">${rec?.disponible?'✅ Dispo':'❌ Indispo'}</div>
+      <div class="ri-hrs">${(()=>{if(!rec?.disponible||!rec.heure_debut)return'';try{const sl=JSON.parse(rec.heure_debut);if(Array.isArray(sl))return sl.map(s=>s.label||s.d+'–'+s.f).join(' · ');}catch(e){}return rec.heure_debut;})()} </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  MY SHIFTS
+// ═══════════════════════════════════════════
+let shiftsWeekOff=0, activeShiftDay=null;
+
+function shiftShiftsWeek(dir){
+  shiftsWeekOff+=dir;
+  activeShiftDay=null;
+  $('sh-day-detail').style.display='none';
+  renderMyShifts();
+}
+
+function renderMyShifts(){
+  if(!$('sh-wk-lbl')) return;
+  $('sh-wk-lbl').textContent=fmtWk(shiftsWeekOff);
+  $('btn-prev-sh').disabled=shiftsWeekOff<=0;
+  $('btn-prev-sh').style.opacity=shiftsWeekOff<=0?'.3':'1';
+
+  const dates=weekDates(shiftsWeekOff);
+  const todayIso=today();
+  // Show ALL shifts — smart color coding
+  $('sh-week-grid').innerHTML=dates.map((d,i)=>{
+    const diso=iso(d);
+    const isPast=diso<todayIso, isToday=diso===todayIso;
+    const allDayShifts=shifts.filter(s=>s.date===diso);
+    const myDayShifts=allDayShifts.filter(s=>s.voiturier_id===ME.id);
+    const unassigned=allDayShifts.filter(s=>!s.voiturier_id);
+    const hasAny=allDayShifts.length>0;
+    const hasMine=myDayShifts.length>0;
+    const hasOthers=allDayShifts.filter(s=>s.voiturier_id&&s.voiturier_id!==ME.id).length>0;
+    const allFull=hasAny&&unassigned.length===0;
+    // Color logic:
+    // - My shift → green (dispo)
+    // - All shifts taken (none mine) → green (full day, no action needed)
+    // - Unassigned shifts exist and I'm not on any → red (alert: shift available)
+    // - No shifts → neutral
+    let cls='day-card';
+    if(isPast) cls+=' past';
+    if(isToday) cls+=' today';
+    if(hasMine) cls+=' dispo'; // my shift = green
+    else if(hasAny&&allFull) cls+=' dispo'; // all taken = green (no action needed)
+    else if(hasAny&&!allFull) cls+=' indispo'; // unassigned shifts = red alert
+    if(diso===activeShiftDay) cls+=' editing';
+    // Icon: car if mine, colleagues if others present
+    const icon=hasMine?'🚗':(hasOthers?'👥':'');
+    const count=allDayShifts.length>0?`${allDayShifts.length} shift${allDayShifts.length>1?'s':''}` :'';
+    return `<div class="${cls}" onclick="openShiftDay('${diso}')">
+      <div class="dc-name">${DS[i]}</div>
+      <div class="dc-num">${d.getDate()}</div>
+      <div class="dc-month">${MS[d.getMonth()]}</div>
+      <div class="dc-icon">${icon}</div>
+      <div class="dc-hrs">${count}</div>
+    </div>`;
+  }).join('');
+}
+
+function openShiftDay(diso){
+  activeShiftDay=diso;
+  const d=new Date(diso+'T00:00:00'), i=diIdx(d);
+  $('sh-dp-dname').textContent=DS[i];
+  $('sh-dp-dnum').textContent=d.getDate();
+  $('sh-dp-dmonth').textContent=ML[d.getMonth()];
+  $('sh-dp-title').textContent=DL[i]+' '+d.getDate()+' '+ML[d.getMonth()];
+  const allDayShifts=shifts.filter(s=>s.date===diso);
+  if(!allDayShifts.length){
+    $('sh-dp-sub').textContent='Aucun shift ce jour';
+    $('sh-dp-list').innerHTML=`<div class="empty" style="padding:24px"><div class="empty-icon">🕐</div><div class="empty-txt">Aucun shift prévu ce jour.</div></div>`;
+  } else {
+    $('sh-dp-sub').textContent=allDayShifts.length+' shift'+(allDayShifts.length>1?'s':'');
+    const sortedDayShifts=allDayShifts.sort((a,b)=>a.debut.localeCompare(b.debut));
+    $('sh-dp-list').innerHTML=sortedDayShifts.map((s,idx)=>{
+      const isMine=s.voiturier_id===ME.id;
+      const ptg=pointages.find(p=>p.shift_id===s.id&&p.voiturier_id===ME.id);
+      const v=s.voiturier_id?voituriers.find(x=>x.id===s.voiturier_id):null;
+      const isStarted=ptg&&ptg.debut_at&&!ptg.fin_at;
+      const isDone=ptg&&ptg.fin_at;
+      let cardCls='shift-card';
+      if(isMine) cardCls+=' mine';
+      if(isStarted) cardCls+=' active-shift';
+      return `<div class="${cardCls}">
+        <div class="sc-head">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="sc-time" style="font-size:20px;font-weight:800;letter-spacing:-.3px">🕐 ${s.debut} → ${s.fin} <span style="font-size:12px;color:var(--muted);font-weight:500">(${dur(s.debut,s.fin)})</span></div>
+            ${s.notes?`<button class="note-btn" onclick="toggleNote(this)" data-note="${s.notes.replace(/"/g,'&quot;')}">💬</button>`:''}
+          </div>
+          ${isMine?'<span class="badge bb">Mon shift</span>':v?`<span class="badge bx">${v.nom}</span>`:'<span class="badge br">Non attribué</span>'}
+        </div>
+        <div class="note-bubble" style="display:none"></div>
+        ${ptg?.lat_debut?`<div><a class="geo-badge" href="https://maps.google.com/?q=${ptg.lat_debut},${ptg.lng_debut}" target="_blank">📍 Départ enregistré</a></div>`:''}
+        ${ptg?.lat_fin?`<div style="margin-top:4px"><a class="geo-badge" href="https://maps.google.com/?q=${ptg.lat_fin},${ptg.lng_fin}" target="_blank">📍 Fin enregistrée</a></div>`:''}
+        ${ptg?.justification?`<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">⏰ Retard : ${ptg.justification}</div>`:''}
+        ${isMine&&!isDone?`<div class="sc-actions">
+          ${s.check_cles?'<div class="check-cles-banner">🔑 CHECK CLÉS</div>':''}
+          ${!isStarted?`<button class="btn-start" onclick="startShift('${s.id}')">▶ Démarrer mon shift</button>`
+          :`<button class="btn-stop" onclick="endShift('${s.id}','${s.fin}')">⏹ Terminer mon shift</button>`}
+        </div>`:''}
+        ${isDone?`<div class="pointage-info">✅ Shift terminé · ${new Date(ptg.debut_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} → ${new Date(ptg.fin_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+  $('sh-day-detail').style.display='block';
+  renderMyShifts();
+  setTimeout(()=>$('sh-day-detail').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function closeShiftDetail(){
+  activeShiftDay=null;
+  $('sh-day-detail').style.display='none';
+  renderMyShifts();
+}
+
+// ─── SHIFT POINTAGE ───
+async function getGeo(){
+  return new Promise((resolve,reject)=>{
+    if(!navigator.geolocation){reject('Géolocalisation non disponible');return;}
+    navigator.geolocation.getCurrentPosition(
+      p=>resolve({lat:p.coords.latitude,lng:p.coords.longitude}),
+      e=>reject('Position non disponible: '+e.message),
+      {enableHighAccuracy:true,timeout:10000}
+    );
+  });
+}
+
+async function startShift(sid){
+  try {
+    // Check same day + 10min rule
+    const s=shifts.find(x=>x.id===sid);
+    if(s){
+      const now=new Date();
+      const todayStr=iso(now);
+      // Must be same day
+      if(s.date!==todayStr){
+        const d=new Date(s.date+'T00:00:00');
+        const lbl=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+        toast('❌ Ce shift est prévu '+lbl,true);
+        return;
+      }
+      // Must be within 10min before start
+      const [hd,md]=s.debut.split(':').map(Number);
+      const shiftStart=new Date(); shiftStart.setHours(hd,md,0,0);
+      const diffMin=Math.round((shiftStart-now)/60000);
+      if(diffMin>10){
+        toast('⏰ Démarrable dans '+diffMin+' min (max 10min avant)',true);
+        return;
+      }
+    }
+    toast('📍 Récupération de votre position...');
+    const geo=await getGeo();
+    const payload={
+      shift_id:sid, voiturier_id:ME.id,
+      debut_at:new Date().toISOString(),
+      lat_debut:geo.lat, lng_debut:geo.lng
+    };
+    const{data,error}=await SB.from('pointages').insert(payload).select().single();
+    if(error){toast('❌ Erreur: '+error.message,true);return;}
+    pointages.push(data);
+    openShiftDay(activeShiftDay);
+    toast('▶ Shift démarré ! Position enregistrée.');
+  } catch(e){toast('❌ '+e,true);}
+}
+
+async function endShift(sid,heureFinPrevue){
+  try {
+    // First: if shift has check_cles, ask confirmation before anything
+    const s=shifts.find(x=>x.id===sid);
+    if(s?.check_cles){
+      // Store pending info, then show check clés modal
+      pendingEndShiftId=sid;
+      pendingEndHeureFin=heureFinPrevue;
+      $('confirm-check-cles').checked=false;
+      $('check-cles-err').style.display='none';
+      openMo('mo-check-cles');
+      return;
+    }
+    await proceedEndShift(sid, heureFinPrevue);
+  } catch(e){toast('❌ '+e,true);}
+}
+
+let pendingEndHeureFin=null;
+
+function toggleCheckClesConfirm(){
+  const cb=$('confirm-check-cles');
+  cb.checked=!cb.checked;
+  if(cb.checked) $('check-cles-err').style.display='none';
+}
+
+async function confirmCheckClesAndEnd(){
+  if(!$('confirm-check-cles').checked){
+    $('check-cles-err').style.display='block';
+    return;
+  }
+  closeMo('mo-check-cles');
+  await proceedEndShift(pendingEndShiftId, pendingEndHeureFin);
+}
+
+async function proceedEndShift(sid, heureFinPrevue){
+  try {
+    toast('📍 Récupération de votre position...');
+    const geo=await getGeo();
+    pendingEndShiftId=sid;
+    pendingEndLat=geo.lat;
+    pendingEndLng=geo.lng;
+    // Check if late > 5 min
+    const now=new Date();
+    const [hf,mf]=heureFinPrevue.split(':').map(Number);
+    const finPrevue=new Date(); finPrevue.setHours(hf,mf,0,0);
+    const retardMin=Math.round((now-finPrevue)/60000);
+    const isLate=retardMin>5;
+    // Always show comment popup
+    $('mo-retard-title').textContent=isLate?'⏰ Fin de shift en retard':'Fin de shift';
+    const infoEl=$('retard-info');
+    if(isLate){
+      infoEl.textContent='Vous terminez avec '+retardMin+' minutes de retard (prévu : '+heureFinPrevue+'). Justification obligatoire.';
+      infoEl.style.display='block';
+      $('retard-lbl').textContent='Justification du retard (obligatoire)';
+    } else {
+      infoEl.style.display='none';
+      $('retard-lbl').textContent='Commentaire de fin de shift (optionnel)';
+    }
+    $('retard-txt').value='';
+    // Store retard info for confirmEndShift
+    pendingRetardMin=retardMin;
+    pendingIsLate=isLate;
+    openMo('mo-retard');
+  } catch(e){toast('❌ '+e,true);}
+}
+let pendingRetardMin=0, pendingIsLate=false;
+
+async function confirmEndShift(){
+  const txt=$('retard-txt').value.trim();
+  if(pendingIsLate&&!txt){toast('❌ La justification est obligatoire en cas de retard',true);return;}
+  await doEndShift(pendingRetardMin,txt);
+  closeMo('mo-retard');
+}
+
+async function doEndShift(retardMin,justification){
+  const ptg=pointages.find(p=>p.shift_id===pendingEndShiftId&&p.voiturier_id===ME.id&&!p.fin_at);
+  if(!ptg){toast('❌ Pointage de départ introuvable',true);return;}
+  const updates={fin_at:new Date().toISOString(),lat_fin:pendingEndLat,lng_fin:pendingEndLng};
+  if(retardMin>5){updates.retard_min=retardMin;}
+  if(justification){updates.justification=justification;}
+  const{error}=await SB.from('pointages').update(updates).eq('id',ptg.id);
+  if(error){toast('❌ '+error.message,true);return;}
+  Object.assign(ptg,updates);
+  openShiftDay(activeShiftDay);
+  toast('⏹ Shift terminé ! Position enregistrée.');
+}
+
+function srHTML(s){return '';}
+
+// ═══════════════════════════════════════════
+//  ÉQUIPE
+// ═══════════════════════════════════════════
+function renderEquipe(){
+  $('equipe-sub').textContent=voituriers.length+' membre'+(voituriers.length!==1?'s':'');
+  const g=$('equipe-grid');
+  if(!voituriers.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👤</div><div class="empty-txt">Aucun voiturier. Cliquez sur "+ Ajouter".</div></div>`;return;}
+  g.innerHTML=voituriers.map(v=>`
+    <div class="v-card">
+      <div class="v-av ${COLORS[v.couleur||0]}">${initials(v.nom)}</div>
+      <div class="v-name">${v.nom}</div>
+      <div class="v-meta">${v.tel||'—'}</div>
+      <div class="v-pin">PIN : ${v.pin}</div>
+      <div class="v-actions">
+        <button class="btn btn-primary btn-sm" onclick="openVoiturieurStats('${v.id}')">📊 Heures</button>
+        <button class="btn btn-secondary btn-sm" onclick="openEditPin('${v.id}')">✏️ PIN</button>
+        <button class="btn btn-danger" onclick="delV('${v.id}')">Suppr.</button>
+      </div>
+    </div>`).join('');
+}
+
+async function addVoiturier(){
+  const nom=$v('nv-nom'),tel=$v('nv-tel');
+  const pin=['np0','np1','np2','np3'].map(id=>$(id).value).join('');
+  const err=$('nv-err');err.style.display='none';
+  if(!nom){showErr(err,'Nom requis.');return;}
+  if(!/^\d{4}$/.test(pin)){showErr(err,'PIN : 4 chiffres requis.');return;}
+  if(voituriers.find(v=>v.pin===pin)){showErr(err,'Ce PIN est déjà utilisé.');return;}
+  const couleur=voituriers.length%8;
+  const{data,error}=await SB.from('voituriers').insert({nom,tel,pin,couleur}).select().single();
+  if(error){showErr(err,error.message);return;}
+  voituriers.push(data);closeMo('mo-add-v');
+  $('nv-nom').value='';$('nv-tel').value='';
+  ['np0','np1','np2','np3'].forEach(id=>$(id).value='');
+  renderEquipe();fillSel();toast('✅ Voiturier ajouté ! PIN : '+pin);
+}
+
+function openEditPin(id){
+  editPinId=id;
+  ['ep0','ep1','ep2','ep3'].forEach(id=>$(id).value='');
+  initPin(['ep0','ep1','ep2','ep3'],savePin);
+  openMo('mo-pin');
+}
+
+async function savePin(){
+  const pin=['ep0','ep1','ep2','ep3'].map(id=>$(id).value).join('');
+  if(!/^\d{4}$/.test(pin)){toast('❌ PIN invalide',true);return;}
+  if(voituriers.find(v=>v.pin===pin&&v.id!==editPinId)){toast('❌ PIN déjà utilisé',true);return;}
+  await SB.from('voituriers').update({pin}).eq('id',editPinId);
+  voituriers.find(v=>v.id===editPinId).pin=pin;
+  closeMo('mo-pin');renderEquipe();toast('✅ PIN modifié : '+pin);
+}
+
+async function delV(id){
+  if(!confirm('Supprimer ce voiturier ?'))return;
+  await SB.from('voituriers').delete().eq('id',id);
+  voituriers=voituriers.filter(v=>v.id!==id);
+  shifts=shifts.map(s=>s.voiturier_id===id?{...s,voiturier_id:null}:s);
+  renderEquipe();fillSel();renderPlanning();toast('🗑 Voiturier supprimé');
+}
+
+// ═══════════════════════════════════════════
+//  SHIFTS
+// ═══════════════════════════════════════════
+function shiftMgrShiftsWeek(dir){
+  mgrShiftsWeekOff+=dir;
+  activeMgrShiftDay=null;
+  $('msh-day-detail').style.display='none';
+  renderShifts();
+}
+
+function renderShifts(){
+  if(!$('msh-wk-lbl')) return;
+  $('msh-wk-lbl').textContent=fmtWk(mgrShiftsWeekOff);
+  $('shifts-sub').textContent=shifts.length+' shift'+(shifts.length!==1?'s':'');
+  const dates=weekDates(mgrShiftsWeekOff);
+  const todayIso=today();
+
+  $('msh-week-grid').innerHTML=dates.map((d,i)=>{
+    const diso=iso(d);
+    const isPast=diso<todayIso, isToday=diso===todayIso;
+    const dayShifts=shifts.filter(s=>s.date===diso);
+    const hasShift=dayShifts.length>0;
+    const assigned=dayShifts.filter(s=>s.voiturier_id).length;
+    let cls='day-card';
+    // Past days: clickable but visually muted (not .past which blocks clicks)
+    if(isPast&&!hasShift) cls+=' past'; // only block if no shifts
+    if(isPast&&hasShift) cls+=' day-past-shifts'; // custom style: muted but clickable
+    if(isToday) cls+=' today';
+    if(hasShift&&assigned===dayShifts.length) cls+=' dispo';
+    else if(hasShift) cls+=' indispo';
+    if(diso===activeMgrShiftDay) cls+=' editing';
+    const icon=hasShift?'🕐':'';
+    const count=hasShift?`${dayShifts.length} shift${dayShifts.length>1?'s':''}` :'';
+    return `<div class="${cls}" onclick="openMgrShiftDay('${diso}')">
+      <div class="dc-name">${DS[i]}</div>
+      <div class="dc-num">${d.getDate()}</div>
+      <div class="dc-month">${MS[d.getMonth()]}</div>
+      <div class="dc-icon">${icon}</div>
+      <div class="dc-hrs">${count}</div>
+    </div>`;
+  }).join('');
+}
+
+function openMgrShiftDay(diso){
+  activeMgrShiftDay=diso;
+  const d=new Date(diso+'T00:00:00'), i=diIdx(d);
+  $('msh-dp-dname').textContent=DS[i];
+  $('msh-dp-dnum').textContent=d.getDate();
+  $('msh-dp-dmonth').textContent=ML[d.getMonth()];
+  $('msh-dp-title').textContent=DL[i]+' '+d.getDate()+' '+ML[d.getMonth()];
+  const dayShifts=shifts.filter(s=>s.date===diso);
+  $('msh-dp-sub').textContent=dayShifts.length+' shift'+(dayShifts.length>1?'s':'');
+  if(!dayShifts.length){
+    $('msh-dp-list').innerHTML=`<div class="empty" style="padding:24px"><div class="empty-icon">🕐</div><div class="empty-txt">Aucun shift ce jour.</div></div>`;
+  } else {
+    $('msh-dp-list').innerHTML=dayShifts.sort((a,b)=>a.debut.localeCompare(b.debut)).map(s=>{
+      const v=s.voiturier_id?voituriers.find(x=>x.id===s.voiturier_id):null;
+      const ptg=pointages.find(p=>p.shift_id===s.id);
+      const cardBg=v?'border-color:var(--green);background:rgba(24,168,122,.04);':'border-color:var(--red);background:rgba(224,62,56,.04);';
+      const isPastShift=diso<today();
+      return `<div class="shift-card" style="${cardBg}">
+        <div class="sc-head">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="sc-time" style="font-size:20px;font-weight:800;letter-spacing:-.3px">🕐 ${s.debut} → ${s.fin} <span style="font-size:12px;color:var(--muted);font-weight:500">(${dur(s.debut,s.fin)})</span></div>
+            ${s.check_cles?'<span style="font-size:11px;font-weight:700;color:var(--accent);background:rgba(201,162,39,.12);padding:2px 8px;border-radius:5px;font-family:var(--mono)">🔑 CHECK CLÉS</span>':''}
+            ${s.notes?`<button class="note-btn" onclick="toggleNote(this)" data-note="${s.notes.replace(/"/g,'&quot;')}">💬</button>`:''}
+          </div>
+          ${v
+            ?`<span style="display:flex;align-items:center;gap:7px">
+                <span class="${COLORS[v.couleur%8]}" style="width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">${initials(v.nom)}</span>
+                <span style="font-weight:700;font-size:15px">${v.nom}</span>
+              </span>`
+            :'<span style="color:var(--red);font-weight:700;font-size:13px">Non attribué</span>'}
+        </div>
+        <div class="note-bubble" style="display:none"></div>
+        ${ptg?.lat_debut?`<a class="geo-badge" href="https://maps.google.com/?q=${ptg.lat_debut},${ptg.lng_debut}" target="_blank">📍 Position départ</a>`:''}
+        ${ptg?.lat_fin?` <a class="geo-badge" href="https://maps.google.com/?q=${ptg.lat_fin},${ptg.lng_fin}" target="_blank">📍 Position fin</a>`:''}
+        ${ptg?.justification?`<div style="font-size:11px;color:var(--red);margin-top:6px">⏰ Retard : ${ptg.justification}</div>`:''}
+        ${ptg?.debut_at?`<div class="pointage-info">▶ ${new Date(ptg.debut_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}${ptg.fin_at?' → ⏹ '+new Date(ptg.fin_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):' (en cours)'}</div>`:''}
+        ${isPastShift
+          ?`<div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">📋 Shift terminé — lecture seule</div>`
+          :`<div class="sc-actions" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+              <button class="btn btn-secondary" style="font-size:11px;padding:6px 10px" onclick="openEditShift('${s.id}')">✏️</button>
+              <button class="btn btn-secondary" style="font-size:11px;padding:6px 10px" onclick="openAssign('${s.id}')">👤</button>
+              <button class="btn btn-danger" style="font-size:11px;padding:6px 10px" onclick="delS('${s.id}')">✕</button>
+            </div>`}
+      </div>`;
+    }).join('');
+  }
+  // Store current day for the create button
+  $('msh-create-btn').onclick=()=>openAddShiftForDay(diso);
+
+  $('msh-day-detail').style.display='block';
+  renderShifts();
+  setTimeout(()=>$('msh-day-detail').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function openAddShiftForDay(diso){
+  // Pre-fill date in add shift modal
+  $('ns-date').value=diso;
+  openMo('mo-add-s');
+}
+
+function closeMgrShiftDetail(){
+  activeMgrShiftDay=null;
+  $('msh-day-detail').style.display='none';
+  renderShifts();
+}
+
+function openEditShift(sid){
+  editShiftId=sid;
+  const s=shifts.find(x=>x.id===sid);
+  $('es-date').value=s.date;
+  $('es-deb').value=s.debut;
+  $('es-fin').value=s.fin;
+  $('es-note').value=s.notes||'';
+  $('es-check-cles').checked=s.check_cles||false;
+  openMo('mo-edit-s');
+}
+
+async function saveEditShift(){
+  const date=$v('es-date'),deb=$v('es-deb'),fin=$v('es-fin');
+  const err=$('es-err'); err.style.display='none';
+  if(!date||!deb||!fin){showErr(err,'Tous les champs sont requis.');return;}
+  const d=new Date(date+'T00:00:00');
+  const nom=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+' · '+deb+'–'+fin;
+  const note=$('es-note').value.trim();
+  const checkCles=$('es-check-cles').checked;
+  const{error}=await SB.from('shifts').update({date,debut:deb,fin,nom,notes:note,check_cles:checkCles}).eq('id',editShiftId);
+  if(error){showErr(err,error.message);return;}
+  const s=shifts.find(x=>x.id===editShiftId);
+  Object.assign(s,{date,debut:deb,fin,nom,notes:note,check_cles:checkCles});
+  closeMo('mo-edit-s');
+  renderShifts(); renderPlanning();
+  if(activeMgrShiftDay) openMgrShiftDay(activeMgrShiftDay);
+  toast('✅ Shift modifié !');
+}
+
+function toggleNsCheckCles(){
+  const cb=$('ns-check-cles');
+  cb.checked=!cb.checked;
+}
+function toggleEsCheckCles(){
+  const cb=$('es-check-cles');
+  cb.checked=!cb.checked;
+}
+
+async function addShift(){
+  const date=$v('ns-date'),deb=$v('ns-deb'),fin=$v('ns-fin');
+  const err=$('ns-err');err.style.display='none';
+  if(!date||!deb||!fin){showErr(err,'Tous les champs sont requis.');return;}
+  const d=new Date(date+'T00:00:00');
+  const nom=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+' · '+deb+'–'+fin;
+  const note=$('ns-note').value.trim();
+  const checkCles=$('ns-check-cles').checked;
+  const{data,error}=await SB.from('shifts').insert({nom,date,debut:deb,fin,notes:note,check_cles:checkCles}).select().single();
+  if(error){showErr(err,error.message);return;}
+  shifts.push(data);closeMo('mo-add-s');
+  ['ns-date','ns-deb','ns-fin'].forEach(id=>$(id).value='');
+  $('ns-note').value='';
+  $('ns-check-cles').checked=false;
+  renderShifts();renderPlanning();
+  toast('✅ Shift créé !');
+}
+
+async function delS(id){
+  if(!confirm('Supprimer ce shift ?'))return;
+  await SB.from('shifts').delete().eq('id',id);
+  shifts=shifts.filter(s=>s.id!==id);
+  $('msh-day-detail').style.display='none';
+  activeMgrShiftDay=null;
+  renderShifts();renderPlanning();toast('🗑 Shift supprimé');
+}
+
+// ═══════════════════════════════════════════
+//  PLANNING
+// ═══════════════════════════════════════════
+function toMin(t){const[h,mn]=t.split(':').map(Number);return h*60+mn;}
+
+function hasOverlap(vid, date, debut, fin){
+  // Check if voiturier already has a shift that overlaps with debut-fin
+  // Allow up to 10 min gap between shifts
+  const TOLERANCE = 10;
+  const vShifts = shifts.filter(s=>s.voiturier_id===vid&&s.date===date);
+  const newStart = toMin(debut);
+  const newEnd = toMin(fin);
+  return vShifts.some(s=>{
+    const sStart = toMin(s.debut);
+    const sEnd = toMin(s.fin);
+    // Overlap if new shift starts before existing ends (minus tolerance)
+    // AND new shift ends after existing starts (plus tolerance)
+    return newStart < sEnd - TOLERANCE && newEnd > sStart + TOLERANCE;
+  });
+}
+
+async function autoAssign(){
+  let nb=0;
+  for(const s of shifts){
+    if(s.voiturier_id)continue;
+    const ok=voituriers.filter(v=>{
+      // Check dispo
+      const d=dispos.find(x=>x.voiturier_id===v.id&&x.date_jour===s.date);
+      if(!d||!d.disponible)return false;
+      // Check creneau overlap with dispo slots
+      try{
+        const slots=JSON.parse(d.heure_debut||'[]');
+        if(Array.isArray(slots)&&slots.length){
+          if(!slots.some(sl=>toMin(s.debut)>=toMin(sl.d)&&toMin(s.fin)<=toMin(sl.f))) return false;
+        }
+      }catch(e){}
+      // Check no shift overlap for this voiturier on this date
+      if(hasOverlap(v.id, s.date, s.debut, s.fin)) return false;
+      return true;
+    });
+    if(!ok.length)continue;
+    // Sort by least shifts assigned that day
+    ok.sort((a,b)=>shifts.filter(x=>x.voiturier_id===a.id&&x.date===s.date).length
+                  -shifts.filter(x=>x.voiturier_id===b.id&&x.date===s.date).length);
+    s.voiturier_id=ok[0].id;
+    await SB.from('shifts').update({voiturier_id:s.voiturier_id}).eq('id',s.id);
+    nb++;
+  }
+  renderPlanning();
+  toast(nb>0?`⚡ ${nb} shift${nb>1?'s':''} attribué${nb>1?'s':''} !`:'ℹ️ Aucun shift à attribuer');
+}
+
+function shiftPlanningWk(dir){
+  planningWeekOff+=dir;
+  renderPlanning();
+}
+
+function renderPlanning(){
+  if($('plan-wk-lbl')) $('plan-wk-lbl').textContent=fmtWk(planningWeekOff);
+  if($('btn-prev-plan')) {
+    $('btn-prev-plan').disabled=planningWeekOff<=0;
+    $('btn-prev-plan').style.opacity=planningWeekOff<=0?'.3':'1';
+  }
+  // Filter shifts for current week
+  const wkDates=weekDates(planningWeekOff).map(d=>iso(d));
+  const wkShifts=shifts.filter(s=>wkDates.includes(s.date));
+  const assigned=wkShifts.filter(s=>s.voiturier_id).length;
+  $('st-tot').textContent=wkShifts.length;
+  $('st-ok').textContent=assigned;
+  $('st-pend').textContent=wkShifts.length-assigned;
+  const body=$('plan-body'),empty=$('plan-empty');
+  if(!wkShifts.length){body.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  body.innerHTML=[...wkShifts].sort((a,b)=>(a.date+a.debut).localeCompare(b.date+b.debut)).map(s=>{
+    const v=s.voiturier_id?voituriers.find(x=>x.id===s.voiturier_id):null;
+    const d=new Date(s.date+'T00:00:00');
+    const rowBg=v?'background:rgba(24,168,122,.05);':'background:rgba(224,62,56,.05);';
+    const borderLeft=v?'border-left:3px solid var(--green);':'border-left:3px solid var(--red);';
+    return `<tr style="${rowBg}${borderLeft}">
+      <td style="font-size:12px;color:var(--muted)">${d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</td>
+      <td><span class="shift-pill">🕐 ${s.debut}–${s.fin}</span></td>
+      <td>${v?`<span style="display:flex;align-items:center;gap:8px">
+        <span class="${COLORS[v.couleur%8]}" style="width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">${initials(v.nom)}</span>
+        <span style="font-weight:700;font-size:14px">${v.nom}</span></span>`
+        :'<span style="color:var(--red);font-weight:600;font-size:13px">Non attribué</span>'}</td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="openAssign('${s.id}')">✏️</button>
+        ${v?`<button class="btn btn-ghost btn-sm" onclick="unassign('${s.id}')">✗</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openAssign(sid){
+  assignSid=sid;
+  const s=shifts.find(x=>x.id===sid);
+  $('assign-info').textContent=`${s.date} · ${s.debut}–${s.fin}`;
+  $('assign-sel').innerHTML='<option value="">— Désassigner —</option>'+
+    voituriers.map(v=>{
+      const d=dispos.find(x=>x.voiturier_id===v.id&&x.date_jour===s.date);
+      const ok=d?.disponible?' ✅':' ⚠️ non dispo';
+      return `<option value="${v.id}" ${s.voiturier_id===v.id?'selected':''}>${v.nom}${ok}</option>`;
+    }).join('');
+  openMo('mo-assign');
+}
+
+async function saveAssign(){
+  const val=$('assign-sel').value||null;
+  await SB.from('shifts').update({voiturier_id:val}).eq('id',assignSid);
+  shifts.find(s=>s.id===assignSid).voiturier_id=val;
+  closeMo('mo-assign');
+  renderPlanning();renderShifts();
+  if(activeMgrShiftDay) openMgrShiftDay(activeMgrShiftDay);
+  toast(val?'✅ Assigné !':'🔓 Désassigné');
+}
+
+async function unassign(sid){
+  await SB.from('shifts').update({voiturier_id:null}).eq('id',sid);
+  shifts.find(s=>s.id===sid).voiturier_id=null;
+  renderPlanning();renderShifts();
+  if(activeMgrShiftDay) openMgrShiftDay(activeMgrShiftDay);
+  toast('🔓 Assignation retirée');
+}
+
+// ═══════════════════════════════════════════
+//  DISPOS OVERVIEW
+// ═══════════════════════════════════════════
+async function renderDispos(){
+  const dates=weekDates(mgrWkOff);
+  $('mgr-wk-lbl').textContent=fmtWk(mgrWkOff);
+  const isos=dates.map(iso);
+  const{data}=await SB.from('disponibilites').select('*').in('date_jour',isos);
+  const wd=data||[];
+  if(!voituriers.length){$('dispos-body').innerHTML=`<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Aucun voiturier.</div></div>`;return;}
+  $('dispos-body').innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>Voiturier</th>${dates.map((d,i)=>`<th>${DS[i]}<br><span style="font-weight:400">${d.getDate()}/${d.getMonth()+1}</span></th>`).join('')}</tr></thead>
+    <tbody>${voituriers.map(v=>`<tr>
+      <td><span style="display:flex;align-items:center;gap:7px">
+        <span class="${COLORS[v.couleur%8]}" style="width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">${initials(v.nom)}</span>
+        ${v.nom}</span></td>
+      ${dates.map(d=>{
+        const diso=iso(d),rec=wd.find(x=>x.voiturier_id===v.id&&x.date_jour===diso);
+        if(!rec)return`<td style="text-align:center"><span class="badge bx">—</span></td>`;
+        if(!rec.disponible)return`<td style="text-align:center"><span class="badge br">❌</span></td>`;
+        const ovHrs=(()=>{try{const sl=JSON.parse(rec.heure_debut);if(Array.isArray(sl))return sl.map(s=>s.label||s.d+'–'+s.f).join(', ');}catch(e){}return rec.heure_debut||'';})();
+        return`<td style="text-align:center"><span class="badge bg">✅</span><br><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">${ovHrs}</span></td>`;
+      }).join('')}
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+function shiftMgrWk(dir){mgrWkOff+=dir;renderDispos();}
+
+// ═══════════════════════════════════════════
+//  EXPORT CSV
+// ═══════════════════════════════════════════
+function toCSV(headers, rows){
+  const escape=v=>{
+    if(v===null||v===undefined)return'';
+    const s=String(v);
+    return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;
+  };
+  return[headers.join(','),...rows.map(r=>r.map(escape).join(','))].join('\n');
+}
+
+function downloadCSV(filename, csvContent){
+  const bom='\uFEFF'; // UTF-8 BOM for Excel compatibility
+  const blob=new Blob([bom+csvContent],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportAllCSV(){
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('fr-FR').replace(/\//g,'-');
+
+  // ── Voituriers
+  const csvV=toCSV(
+    ['ID','Nom','Téléphone','PIN','Couleur','Créé le'],
+    voituriers.map(v=>[v.id,v.nom,v.tel||'',v.pin,v.couleur,v.created_at?.split('T')[0]||''])
+  );
+  downloadCSV(`planair_voituriers_${dateStr}.csv`, csvV);
+
+  // ── Shifts
+  setTimeout(()=>{
+    const csvS=toCSV(
+      ['ID','Date','Début','Fin','Durée (min)','Voiturier assigné','Créé le'],
+      [...shifts].sort((a,b)=>(a.date+a.debut).localeCompare(b.date+b.debut)).map(s=>{
+        const v=s.voiturier_id?voituriers.find(x=>x.id===s.voiturier_id):null;
+        const m=t=>{const[h,mn]=t.split(':').map(Number);return h*60+mn;};
+        let dureeMin=m(s.fin)-m(s.debut);
+        if(dureeMin<0)dureeMin+=1440;
+        return[s.id,s.date,s.debut,s.fin,dureeMin,v?v.nom:'Non assigné',s.created_at?.split('T')[0]||''];
+      })
+    );
+    downloadCSV(`planair_shifts_${dateStr}.csv`, csvS);
+  }, 400);
+
+  // ── Pointages (heures réelles)
+  setTimeout(()=>{
+    const csvP=toCSV(
+      ['ID','Shift ID','Voiturier','Date','Heure début réelle','Heure fin réelle','Durée réelle (min)','Montant (€)','Lat départ','Lng départ','Lat fin','Lng fin','Retard (min)','Justification retard'],
+      pointages.filter(p=>p.debut_at&&p.fin_at).map(p=>{
+        const v=voituriers.find(x=>x.id===p.voiturier_id);
+        const debut=new Date(p.debut_at);
+        const fin=new Date(p.fin_at);
+        const dureeMin=Math.round((fin-debut)/60000);
+        const montant=(dureeMin/60*12).toFixed(2);
+        const dateStr=debut.toLocaleDateString('fr-FR');
+        const debutStr=debut.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        const finStr=fin.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        return[
+          p.id,p.shift_id,v?v.nom:'Inconnu',dateStr,debutStr,finStr,
+          dureeMin,montant,
+          p.lat_debut||'',p.lng_debut||'',p.lat_fin||'',p.lng_fin||'',
+          p.retard_min||0,p.justification||''
+        ];
+      })
+    );
+    downloadCSV(`planair_pointages_${dateStr}.csv`, csvP);
+  }, 800);
+
+  // ── Disponibilités
+  setTimeout(()=>{
+    const csvD=toCSV(
+      ['Voiturier','Date','Disponible','Créneaux','Mis à jour le'],
+      dispos.map(d=>{
+        const v=voituriers.find(x=>x.id===d.voiturier_id);
+        let creneaux='';
+        try{
+          const sl=JSON.parse(d.heure_debut||'[]');
+          if(Array.isArray(sl))creneaux=sl.map(s=>`${s.label}: ${s.d}–${s.f}`).join(' | ');
+          else creneaux=d.heure_debut||'';
+        }catch(e){creneaux=d.heure_debut||'';}
+        return[v?v.nom:'Inconnu',d.date_jour,d.disponible?'Oui':'Non',creneaux,d.updated_at?.split('T')[0]||''];
+      })
+    );
+    downloadCSV(`planair_disponibilites_${dateStr}.csv`, csvD);
+  }, 1200);
+
+  toast('✅ Export en cours — 4 fichiers téléchargés !');
+}
+
+// ═══════════════════════════════════════════
+//  VOITURIER STATS
+// ═══════════════════════════════════════════
+let statsVoiturierId=null;
+
+function openVoiturieurStats(vid){
+  statsVoiturierId=vid;
+  const v=voituriers.find(x=>x.id===vid);
+  $('stats-v-name').textContent=`📊 ${v.nom} — Heures travaillées`;
+  // Default: current month
+  const now=new Date();
+  const y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0');
+  const lastDay=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  $('stats-date-from').value=`${y}-${m}-01`;
+  $('stats-date-to').value=`${y}-${m}-${String(lastDay).padStart(2,'0')}`;
+  $('stats-result').style.display='none';
+  openMo('mo-stats-v');
+}
+
+function calcStats(){
+  const from=$('stats-date-from').value;
+  const to=$('stats-date-to').value;
+  if(!from||!to){toast('❌ Choisissez une période',true);return;}
+  if(from>to){toast('❌ La date de début doit être avant la fin',true);return;}
+
+  // Filter pointages for this voiturier in this period
+  const myPointages=pointages.filter(p=>{
+    if(p.voiturier_id!==statsVoiturierId)return false;
+    if(!p.debut_at||!p.fin_at)return false; // only completed shifts
+    const shiftDate=p.debut_at.split('T')[0];
+    return shiftDate>=from&&shiftDate<=to;
+  });
+
+  if(!myPointages.length){
+    $('stats-result').style.display='block';
+    $('stats-heures').textContent='0h00';
+    $('stats-shifts').textContent='0';
+    $('stats-euros').textContent='0,00 €';
+    $('stats-detail').innerHTML='<em>Aucun shift effectué sur cette période.</em>';
+    return;
+  }
+
+  // Calculate total minutes from real pointage times
+  let totalMins=0;
+  const details=[];
+  myPointages.forEach((p,idx)=>{
+    const debut=new Date(p.debut_at);
+    const fin=new Date(p.fin_at);
+    const mins=Math.round((fin-debut)/60000);
+    totalMins+=mins;
+    const dateStr=debut.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+    const debutStr=debut.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const finStr=fin.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const h=Math.floor(mins/60), m=mins%60;
+    // Find matching shift for comparison
+    const s=shifts.find(x=>x.id===p.shift_id);
+    const isLate=!!(p.retard_min>0);
+    const hasComment=!!(p.justification&&!isLate);
+    const hasAny=isLate||hasComment;
+    // Store data in global map
+    if(hasAny){
+      window._retardMap=window._retardMap||{};
+      window._retardMap[p.id]={
+        prevuDebut: s?s.debut:'?',
+        prevuFin: s?s.fin:'?',
+        reelDebut: debutStr,
+        reelFin: finStr,
+        retardMin: p.retard_min||0,
+        justification: p.justification||'',
+        isLate: isLate,
+        hasComment: hasComment,
+        shiftDate: s?s.date:null
+      };
+    }
+    const icon=isLate?'⏰':hasComment?'💬':'';
+    const btnCls=isLate?'stat-retard-btn':'stat-comment-btn';
+    details.push(
+      `<span class="stat-detail-row">` +
+      `<span>${dateStr} · ${debutStr}–${finStr} = ${h}h${String(m).padStart(2,'0')}</span>` +
+      `${hasAny?`<button class="${btnCls}" onclick="openRetardDetail('${p.id}')">${icon}</button>`:''}` +
+      `</span>`
+    );
+  });
+
+  const totalH=Math.floor(totalMins/60);
+  const totalM=totalMins%60;
+  const euros=(totalMins/60*12);
+  const eurosStr=euros.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  $('stats-heures').textContent=`${totalH}h${String(totalM).padStart(2,'0')}`;
+  $('stats-shifts').textContent=myPointages.length;
+  $('stats-euros').textContent=eurosStr+' €';
+  $('stats-detail').innerHTML=details.join('');
+  $('stats-result').style.display='block';
+}
+
+// ── NOTE TOGGLE ──
+let _currentRetardDate=null;
+
+function gotoShiftDate(){
+  if(!_currentRetardDate) return;
+  // Show popup with all shifts of that day
+  const diso=_currentRetardDate;
+  const d=new Date(diso+'T00:00:00');
+  const lbl=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  $('day-shifts-title').textContent='📋 '+lbl;
+  const dayShifts=shifts.filter(s=>s.date===diso).sort((a,b)=>a.debut.localeCompare(b.debut));
+  if(!dayShifts.length){
+    $('day-shifts-content').innerHTML='<div class="empty"><div class="empty-icon">🕐</div><div class="empty-txt">Aucun shift ce jour.</div></div>';
+  } else {
+    $('day-shifts-content').innerHTML=dayShifts.map(s=>{
+      const v=s.voiturier_id?voituriers.find(x=>x.id===s.voiturier_id):null;
+      const ptg=pointages.find(p=>p.shift_id===s.id);
+      const hasComment=!!(ptg?.justification);
+      const isLate=!!(ptg?.retard_min>0);
+      return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:16px;font-weight:800;font-family:var(--font)">🕐 ${s.debut} → ${s.fin}</div>
+          ${v
+            ?`<span style="display:flex;align-items:center;gap:7px">
+                <span class="${COLORS[v.couleur%8]}" style="width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800">${initials(v.nom)}</span>
+                <span style="font-weight:700;font-size:14px">${v.nom}</span>
+              </span>`
+            :'<span style="color:var(--red);font-size:13px;font-weight:600">Non attribué</span>'}
+        </div>
+        ${s.check_cles?'<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">🔑 CHECK CLÉS</div>':''}
+        ${s.notes?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px;background:var(--s1);padding:8px 10px;border-radius:7px">📝 Note manager : ${s.notes}</div>`:''}
+        ${ptg?.debut_at?`<div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-bottom:4px">▶ ${new Date(ptg.debut_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}${ptg.fin_at?' → ⏹ '+new Date(ptg.fin_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):' (en cours)'}</div>`:''}
+        ${ptg?.lat_debut?`<a class="geo-badge" href="https://maps.google.com/?q=${ptg.lat_debut},${ptg.lng_debut}" target="_blank">📍 Position départ</a> `:''}
+        ${ptg?.lat_fin?`<a class="geo-badge" href="https://maps.google.com/?q=${ptg.lat_fin},${ptg.lng_fin}" target="_blank">📍 Position fin</a>`:''}
+        ${isLate?`<div style="font-size:12px;color:var(--red);margin-top:6px;background:rgba(224,62,56,.06);padding:8px 10px;border-radius:7px">⏰ Retard +${ptg.retard_min}min : ${ptg.justification}</div>`:''}
+        ${hasComment&&!isLate?`<div style="font-size:12px;color:var(--text);margin-top:6px;background:var(--s1);padding:8px 10px;border-radius:7px">💬 ${ptg.justification}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+  openMo('mo-day-shifts');
+}
+
+function openRetardDetail(pid){
+  const data=(window._retardMap||{})[pid];
+  if(!data){toast('❌ Données introuvables',true);return;}
+  // Store date for goto button
+  _currentRetardDate=data.shiftDate||null;
+  const gotoBtn=$('retard-detail-goto');
+  if(gotoBtn) gotoBtn.style.display=_currentRetardDate&&ME.role==='manager'?'block':'none';
+  const c=$('retard-detail-content');
+  // Comment only (no late) — simple display
+  if(data.hasComment&&!data.isLate){
+    c.innerHTML=
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px">' +
+        '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-bottom:8px">💬 Commentaire du voiturier</div>' +
+        '<div style="font-size:14px;line-height:1.6">'+data.justification+'</div>' +
+        '<div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--muted)">Shift : '+data.prevuDebut+' → '+data.prevuFin+' · Réel : '+data.reelDebut+' → '+data.reelFin+'</div>' +
+      '</div>';
+    openMo('mo-retard-detail');
+    return;
+  }
+  c.innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">' +
+      '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">' +
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Prévu</div>' +
+        '<div style="font-size:18px;font-weight:700">'+data.prevuDebut+'</div>' +
+        '<div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin:4px 0">→</div>' +
+        '<div style="font-size:18px;font-weight:700">'+data.prevuFin+'</div>' +
+      '</div>' +
+      '<div style="background:rgba(224,62,56,.06);border:1px solid rgba(224,62,56,.2);border-radius:10px;padding:14px;text-align:center">' +
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Réel</div>' +
+        '<div style="font-size:18px;font-weight:700">'+data.reelDebut+'</div>' +
+        '<div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin:4px 0">→</div>' +
+        '<div style="font-size:18px;font-weight:700">'+data.reelFin+'</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="background:rgba(224,62,56,.06);border:1px solid rgba(224,62,56,.2);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">' +
+      '<span style="font-size:20px">⏰</span>' +
+      '<div>' +
+        '<div style="font-size:12px;color:var(--muted);font-family:var(--mono)">RETARD</div>' +
+        '<div style="font-size:16px;font-weight:700;color:var(--red)">+'+data.retardMin+' minute'+(data.retardMin>1?'s':'')+'</div>' +
+      '</div>' +
+    '</div>' +
+    (data.justification
+      ?'<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">' +
+          '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-bottom:6px">Justification du voiturier</div>' +
+          '<div style="font-size:13px;line-height:1.6">'+data.justification+'</div>' +
+        '</div>'
+      :'');
+  openMo('mo-retard-detail');
+}
+
+function toggleNote(btn){
+  const bubble=btn.closest('.shift-card').querySelector('.note-bubble');
+  if(!bubble) return;
+  const isOpen=bubble.style.display!=='none';
+  if(isOpen){
+    bubble.style.display='none';
+    btn.style.background='rgba(45,110,245,.1)';
+  } else {
+    bubble.textContent=btn.dataset.note;
+    bubble.style.display='block';
+    btn.style.background='rgba(45,110,245,.22)';
+  }
+}
+
+// ═══════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════
+function $(id){return document.getElementById(id);}
+function $v(id){return $(id).value.trim();}
+function ls(k){return localStorage.getItem(k);}
+function ls_set(k,v){localStorage.setItem(k,v);}
+function ls_rm(k){localStorage.removeItem(k);}
+function show(id){const el=$(id);if(el)el.style.display='flex';}
+function hide(id){const el=$(id);if(el)el.style.display='none';}
+function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().substr(0,2);}
+function dur(a,b){const m=t=>{const[h,mn]=t.split(':').map(Number);return h*60+mn;};let d=m(b)-m(a);if(d<0)d+=1440;return Math.floor(d/60)+'h'+(d%60?String(d%60).padStart(2,'0'):'');}
+function showErr(el,msg){el.textContent=msg;el.style.display='block';}
+function openMo(id){$(id).classList.add('open');}
+function closeMo(id){$(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+function toast(msg,isErr=false){const t=$('toast');t.textContent=msg;t.className='toast'+(isErr?' err':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function initPin(ids,onDone){
+  ids.forEach((id,i)=>{
+    const el=$(id);
+    el.oninput=()=>{el.value=el.value.replace(/\D/,'');if(el.value&&i<ids.length-1)$(ids[i+1]).focus();if(el.value&&i===ids.length-1)onDone();};
+    el.onkeydown=e=>{if(e.key==='Backspace'&&!el.value&&i>0)$(ids[i-1]).focus();};
+  });
+}
+initPin(['np0','np1','np2','np3'],()=>{});
+
+init();
+
+// ── ONESIGNAL ──
+const OS_APP_ID = 'cc0d6d60-a4fc-4aff-8cef-ae097050d5ac';
+const OS_API_KEY = 'os_v2_app_zqgw2yfe7rfp7dhpvyexaugvvrla44dctokenhu5w55keitcqsxjd56i4a3353ofb3lvemyqu5y6vuuhvcnllbsbnlqviuxh65bqlaa';
+
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: OS_APP_ID,
+    allowLocalhostAsSecureOrigin: true,
+  });
+  // Once user is logged in, store their OneSignal player ID
+  OneSignal.User.PushSubscription.addEventListener('change', async function(event) {
+    const pid = event.current.id;
+    if(pid && ME?.id && ME.role === 'voiturier') {
+      await SB.from('voituriers').update({onesignal_id: pid}).eq('id', ME.id);
+      const v = voituriers.find(x => x.id === ME.id);
+      if(v) v.onesignal_id = pid;
+    }
+  });
+});
+
+async function promptNotifications() {
+  if(!window.OneSignal) return;
+  try {
+    await window.OneSignal.Notifications.requestPermission();
+    const pid = window.OneSignal.User.PushSubscription.id;
+    if(pid && ME?.id) {
+      await SB.from('voituriers').update({onesignal_id: pid}).eq('id', ME.id);
+      const v = voituriers.find(x => x.id === ME.id);
+      if(v) v.onesignal_id = pid;
+      toast('🔔 Notifications activées !');
+    }
+  } catch(e) { toast('❌ Erreur notifications: ' + e, true); }
+}
+
+async function sendNotifToDay(diso) {
+  const dayShifts = shifts.filter(s => s.date === diso && s.voiturier_id);
+  const playerIds = [];
+  dayShifts.forEach(s => {
+    const v = voituriers.find(x => x.id === s.voiturier_id);
+    if(v?.onesignal_id) playerIds.push(v.onesignal_id);
+  });
+  if(!playerIds.length) {
+    toast('❌ Aucun voiturier avec notifications activées', true);
+    return;
+  }
+  const d = new Date(diso + 'T00:00:00');
+  const lbl = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+  const names = [...new Set(dayShifts.map(s => voituriers.find(x=>x.id===s.voiturier_id)?.nom).filter(Boolean))];
+  try {
+    const res = await fetch('https://api.onesignal.com/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Key ' + OS_API_KEY
+      },
+      body: JSON.stringify({
+        app_id: OS_APP_ID,
+        include_subscription_ids: playerIds,
+        headings: { fr: '🚗 PlanAir — Shift confirmé' },
+        contents: { fr: 'Vous avez un shift le ' + lbl + '. Consultez l\'app pour les détails.' },
+        url: 'https://planair-cdg.vercel.app'
+      })
+    });
+    const data = await res.json();
+    if(data.errors) { toast('❌ ' + JSON.stringify(data.errors), true); return; }
+    toast('🔔 Notification envoyée à ' + names.join(', ') + ' !');
+  } catch(e) { toast('❌ Erreur: ' + e, true); }
+}
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js')
+      .then(()=>console.log('SW registered'))
+      .catch(e=>console.log('SW error', e));
+  });
+}
+</script>
+</body>
+</html>
